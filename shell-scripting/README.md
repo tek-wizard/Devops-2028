@@ -1,7 +1,7 @@
 # Shell Scripting (Session 3)
 
 **Name:** Prateek Singh
-**Enrollment number:** ENROLLMENT_PLACEHOLDER
+**Enrollment number:** 24BCS10135
 
 This folder has all the shell scripting practice from session 3 plus the homework script.
 For every task I have written down what the commands do, the script I wrote, and the
@@ -129,7 +129,7 @@ variable.
 # Variables store a value once and let me reuse it as many times as I want.
 
 name="Prateek Singh"
-roll_no="ENROLLMENT_PLACEHOLDER"
+roll_no="24BCS10135"
 course="DevOps"
 
 # No spaces around the = sign, and I read the value back with a $ in front.
@@ -146,9 +146,9 @@ echo "Today is $today"
 
 ```text
 My name is Prateek Singh
-My roll number is ENROLLMENT_PLACEHOLDER
+My roll number is 24BCS10135
 I am learning DevOps
-Today is Mon Aug 31 11:28:41 UTC 2026
+Today is Mon Aug 31 12:11:26 UTC 2026
 ```
 
 ---
@@ -172,16 +172,16 @@ echo "My roll number is $roll_no"
 echo "My comment is: $comment"
 ```
 
-**What I typed:** `Prateek Singh`, `ENROLLMENT_PLACEHOLDER`, `Shell scripting is fun`
+**What I typed:** `Prateek Singh`, `24BCS10135`, `Shell scripting is fun`
 
 **Output**
 
 ```text
 Enter your name: Prateek Singh
-Enter your roll number: ENROLLMENT_PLACEHOLDER
+Enter your roll number: 24BCS10135
 Enter your comment: Shell scripting is fun
 My name is Prateek Singh
-My roll number is ENROLLMENT_PLACEHOLDER
+My roll number is 24BCS10135
 My comment is: Shell scripting is fun
 ```
 
@@ -492,47 +492,47 @@ chmod +x system_info.sh
 ./system_info.sh
 ```
 
-**What I typed:** `Prateek Singh`, `ENROLLMENT_PLACEHOLDER`, `system_report`
+**What I typed:** `Prateek Singh`, `24BCS10135`, `system_report`
 
 **Output**
 
 ```text
 Enter your name: Prateek Singh
-Enter your roll number: ENROLLMENT_PLACEHOLDER
+Enter your roll number: 24BCS10135
 Enter a name for the report folder: system_report
 
 ===============================================
- System report for Prateek Singh (Roll no: ENROLLMENT_PLACEHOLDER)
+ System report for Prateek Singh (Roll no: 24BCS10135)
 ===============================================
 
-Current date and time : Mon Aug 31 11:28:41 UTC 2026
+Current date and time : Mon Aug 31 12:11:35 UTC 2026
 Hostname              : devops-lab
 Username              : root
 
 ----- Disk usage (df -h) -----
 Filesystem            Size  Used Avail Use% Mounted on
-overlay               911G   53G  812G   7% /
+overlay               911G   55G  811G   7% /
 tmpfs                  64M     0   64M   0% /dev
 shm                    64M     0   64M   0% /dev/shm
-/run/host_mark/Users  927G  268G  659G  29% /home/work
-/dev/vda1             911G   53G  812G   7% /etc/hosts
+/run/host_mark/Users  927G  274G  654G  30% /home/work
+/dev/vda1             911G   55G  811G   7% /etc/hosts
 tmpfs                 7.8G     0  7.8G   0% /proc/scsi
 tmpfs                 7.8G     0  7.8G   0% /sys/firmware
 
 ----- Running processes (ps) -----
-  PID TTY          TIME CMD
- 3356 ?        00:00:00 bash
- 3384 ?        00:00:00 system_info.sh
- 3391 ?        00:00:00 ps
+    PID TTY          TIME CMD
+   4125 ?        00:00:00 bash
+   4132 ?        00:00:00 system_info.sh
+   4139 ?        00:00:00 ps
 
 Process information has been saved in system_report/process.log
 Number of lines saved: 4
 
 ----- First 5 lines of system_report/process.log -----
-  PID TTY          TIME CMD
- 3356 ?        00:00:00 bash
- 3384 ?        00:00:00 system_info.sh
- 3392 ?        00:00:00 ps
+    PID TTY          TIME CMD
+   4125 ?        00:00:00 bash
+   4132 ?        00:00:00 system_info.sh
+   4140 ?        00:00:00 ps
 ```
 
 **Checking the file separately**
@@ -543,13 +543,13 @@ really there and really has the process list in it:
 ```bash
 $ ls -l system_report/
 total 4
--rw-r--r-- 1 root root 123 Aug 31  2026 process.log
+-rw-r--r-- 1 root root 131 Aug 31 12:11 process.log
 
 $ cat system_report/process.log
-  PID TTY          TIME CMD
- 3396 ?        00:00:00 bash
- 3403 ?        00:00:00 system_info.sh
- 3411 ?        00:00:00 ps
+    PID TTY          TIME CMD
+   4125 ?        00:00:00 bash
+   4145 ?        00:00:00 system_info.sh
+   4153 ?        00:00:00 ps
 ```
 
 The PIDs here are different from the run above because this was a separate run of the

@@ -1,7 +1,7 @@
 # Docker Images and Dockerfiles (Sessions 6 and 7)
 
 **Name:** Prateek Singh
-**Enrollment number:** ENROLLMENT_PLACEHOLDER
+**Enrollment number:** 24BCS10135
 
 ## Homework that was given
 
@@ -532,7 +532,7 @@ Content-Type: text/html
 # 5. Session 7 task: the multi-stage Dockerfile from class
 
 **Name:** Prateek Singh
-**Enrollment number:** ENROLLMENT_PLACEHOLDER
+**Enrollment number:** 24BCS10135
 
 The task was to clone the class repo, build the multi-stage Dockerfile that is in it, run a
 container from that image, access the app, and show `docker ps` with the container on

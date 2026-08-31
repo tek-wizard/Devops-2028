@@ -1,7 +1,7 @@
 # DevOps 2028
 
 **Name:** Prateek Singh
-**Enrollment number:** ENROLLMENT_PLACEHOLDER
+**Enrollment number:** 24BCS10135
 
 My homework for the DevOps course. One folder per topic, and each folder has its own
 `README.md` with the theory, the commands I wrote, and the real output from running them.

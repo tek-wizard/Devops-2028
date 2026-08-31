@@ -1,7 +1,7 @@
 # Networking (Session 4)
 
 **Name:** Prateek Singh
-**Enrollment number:** ENROLLMENT_PLACEHOLDER
+**Enrollment number:** 24BCS10135
 
 ## Homework that was given
 

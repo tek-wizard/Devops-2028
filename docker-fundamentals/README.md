@@ -1,7 +1,7 @@
 # Docker Fundamentals (Session 6)
 
 **Name:** Prateek Singh
-**Enrollment number:** ENROLLMENT_PLACEHOLDER
+**Enrollment number:** 24BCS10135
 
 These are my notes from the Docker basics session. Every command here I ran myself and the
 output is pasted exactly as it came out.
