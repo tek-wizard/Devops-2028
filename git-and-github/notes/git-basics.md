@@ -27,3 +27,8 @@ git add .               # stage everything under the current folder
 git commit -m "text"    # commit what is staged
 git log                 # the history
 ```
+
+## Three ways to see what changed
+
+`git status` for the file list, `git diff` for the actual lines, and `git log` for the
+history that is already committed.
