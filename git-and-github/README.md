@@ -74,7 +74,7 @@ $ git status --short
  M git-and-github/notes/git-basics.md
 
 $ git commit -a -m "Expand the git basics notes with the diff commands"
-[main f9e79b4] Expand the git basics notes with the diff commands
+[main 005952d] Expand the git basics notes with the diff commands
  1 file changed, 5 insertions(+)
 
 $ git status --short
@@ -124,20 +124,20 @@ with:
 
 ```bash
 $ git log --oneline -6
-f9e79b4 Expand the git basics notes with the diff commands
-1b050f4 Add notes on the three areas git keeps
-9eaee70 Add session 8 Docker networking, bind mount and volume tasks
-a4470b7 Add Docker image notes with screenshots and the multi-stage task
-b5e9a6b Add Hello World apps and Dockerfiles for node, python, java and apache
-5fb60c4 Add session 6 Docker fundamentals notes
+005952d Expand the git basics notes with the diff commands
+bcfa668 Add notes on the three areas git keeps
+9e151e1 Add session 8 Docker networking, bind mount and volume tasks
+bd1a8d0 Add Docker image notes with screenshots and the multi-stage task
+85cdc96 Add Hello World apps and Dockerfiles for node, python, java and apache
+c6c79f9 Add session 6 Docker fundamentals notes
 ```
 
 `--oneline` is short hash plus subject. In full there is a lot more per commit:
 
 ```bash
 $ git log -1
-commit f9e79b4f79d369ac6f820fe2960e2b0fa7eaa789
-Author: Prateek Singh <prateek.singh02@scalerailabs.com>
+commit 005952db98fe8218c2bbe68a34e1481b6be82c63
+Author: Prateek Singh <apdprateeksingh@gmail.com>
 Date:   Mon Aug 31 17:31:31 2026 +0530
 
     Expand the git basics notes with the diff commands
@@ -167,11 +167,11 @@ $ git switch -c feature/git-notes
 Switched to a new branch 'feature/git-notes'
 
 $ git branch -v
-* feature/git-notes f9e79b4 Expand the git basics notes with the diff commands
-  main              f9e79b4 Expand the git basics notes with the diff commands
+* feature/git-notes 005952d Expand the git basics notes with the diff commands
+  main              005952d Expand the git basics notes with the diff commands
 ```
 
-Both branches point at the **same commit** `f9e79b4`, which is what a branch really is: a
+Both branches point at the **same commit** `005952d`, which is what a branch really is: a
 pointer, not a copy of the files. The `*` marks the branch I am on.
 
 ## Step 3: three commits on the new branch
@@ -193,14 +193,14 @@ $ git commit -m "Add notes on undoing changes with reset and revert"
 
 ```bash
 $ git log --oneline -5
-5d00c61 Add notes on undoing changes with reset and revert
-0c1bde2 Add notes on cherry-pick and when to use it
-25bd581 Add notes on branches and HEAD
-f9e79b4 Expand the git basics notes with the diff commands
-1b050f4 Add notes on the three areas git keeps
+bc8812b Add notes on undoing changes with reset and revert
+ae8b9a3 Add notes on cherry-pick and when to use it
+f48dbe7 Add notes on branches and HEAD
+005952d Expand the git basics notes with the diff commands
+bcfa668 Add notes on the three areas git keeps
 ```
 
-The commit I want on main is the middle one, **`0c1bde2`**. Not the newest, not the oldest,
+The commit I want on main is the middle one, **`ae8b9a3`**. Not the newest, not the oldest,
 so this is a genuine cherry-pick rather than something a merge or a fast forward would do
 anyway.
 
@@ -221,8 +221,8 @@ in the repository, they are just not checked out right now.
 ## Step 5: the cherry-pick
 
 ```bash
-$ git cherry-pick 0c1bde2
-[main f4a50df] Add notes on cherry-pick and when to use it
+$ git cherry-pick ae8b9a3
+[main 84c45a1] Add notes on cherry-pick and when to use it
  Date: Mon Aug 31 17:32:10 2026 +0530
  1 file changed, 55 insertions(+)
  create mode 100644 git-and-github/notes/cherry-pick.md
@@ -244,14 +244,14 @@ ancestor of the branch:
 
 ```bash
 $ git log --oneline --graph --all -8
-* 5d00c61 Add notes on undoing changes with reset and revert
-* 0c1bde2 Add notes on cherry-pick and when to use it
-* 25bd581 Add notes on branches and HEAD
-* f9e79b4 Expand the git basics notes with the diff commands
-* 1b050f4 Add notes on the three areas git keeps
-* 9eaee70 Add session 8 Docker networking, bind mount and volume tasks
-* a4470b7 Add Docker image notes with screenshots and the multi-stage task
-* b5e9a6b Add Hello World apps and Dockerfiles for node, python, java and apache
+* bc8812b Add notes on undoing changes with reset and revert
+* ae8b9a3 Add notes on cherry-pick and when to use it
+* f48dbe7 Add notes on branches and HEAD
+* 005952d Expand the git basics notes with the diff commands
+* bcfa668 Add notes on the three areas git keeps
+* 9e151e1 Add session 8 Docker networking, bind mount and volume tasks
+* bd1a8d0 Add Docker image notes with screenshots and the multi-stage task
+* 85cdc96 Add Hello World apps and Dockerfiles for node, python, java and apache
 ```
 
 After the cherry-pick they have properly diverged, and this is the picture that explains the
@@ -259,50 +259,50 @@ whole thing:
 
 ```bash
 $ git log --oneline --graph --all -8
-* f4a50df Add notes on cherry-pick and when to use it
-| * 5d00c61 Add notes on undoing changes with reset and revert
-| * 0c1bde2 Add notes on cherry-pick and when to use it
-| * 25bd581 Add notes on branches and HEAD
+* 84c45a1 Add notes on cherry-pick and when to use it
+| * bc8812b Add notes on undoing changes with reset and revert
+| * ae8b9a3 Add notes on cherry-pick and when to use it
+| * f48dbe7 Add notes on branches and HEAD
 |/
-* f9e79b4 Expand the git basics notes with the diff commands
-* 1b050f4 Add notes on the three areas git keeps
-* 9eaee70 Add session 8 Docker networking, bind mount and volume tasks
-* a4470b7 Add Docker image notes with screenshots and the multi-stage task
+* 005952d Expand the git basics notes with the diff commands
+* bcfa668 Add notes on the three areas git keeps
+* 9e151e1 Add session 8 Docker networking, bind mount and volume tasks
+* bd1a8d0 Add Docker image notes with screenshots and the multi-stage task
 ```
 
 Reading the drawing:
 
-- The `|/` is where the two lines split, at `f9e79b4`, the commit both branches shared.
-- The left column going up is main, which has exactly one new commit, `f4a50df`.
+- The `|/` is where the two lines split, at `005952d`, the commit both branches shared.
+- The left column going up is main, which has exactly one new commit, `84c45a1`.
 - The indented column is `feature/git-notes` with its three commits.
-- `0c1bde2` and `f4a50df` have the **same message** and sit on **different branches**.
+- `ae8b9a3` and `84c45a1` have the **same message** and sit on **different branches**.
 
 ## Step 7: the detail that matters, two hashes for one change
 
 ```bash
 $ git log --format='%h  %an  %s' feature/git-notes -3
-5d00c61  Prateek Singh  Add notes on undoing changes with reset and revert
-0c1bde2  Prateek Singh  Add notes on cherry-pick and when to use it
-25bd581  Prateek Singh  Add notes on branches and HEAD
+bc8812b  Prateek Singh  Add notes on undoing changes with reset and revert
+ae8b9a3  Prateek Singh  Add notes on cherry-pick and when to use it
+f48dbe7  Prateek Singh  Add notes on branches and HEAD
 
 $ git log --format='%h  %an  %s' main -3
-f4a50df  Prateek Singh  Add notes on cherry-pick and when to use it
-f9e79b4  Prateek Singh  Expand the git basics notes with the diff commands
-1b050f4  Prateek Singh  Add notes on the three areas git keeps
+84c45a1  Prateek Singh  Add notes on cherry-pick and when to use it
+005952d  Prateek Singh  Expand the git basics notes with the diff commands
+bcfa668  Prateek Singh  Add notes on the three areas git keeps
 ```
 
-Same message, same author, **different hash**. `0c1bde2` on the branch, `f4a50df` on main.
+Same message, same author, **different hash**. `ae8b9a3` on the branch, `84c45a1` on main.
 
 Both commits contain the identical change:
 
 ```bash
-$ git show --stat --oneline 0c1bde2
-0c1bde2 Add notes on cherry-pick and when to use it
+$ git show --stat --oneline ae8b9a3
+ae8b9a3 Add notes on cherry-pick and when to use it
  git-and-github/notes/cherry-pick.md | 55 +++++++++++++++++++++++++++++++++++++
  1 file changed, 55 insertions(+)
 
-$ git show --stat --oneline f4a50df
-f4a50df Add notes on cherry-pick and when to use it
+$ git show --stat --oneline 84c45a1
+84c45a1 Add notes on cherry-pick and when to use it
  git-and-github/notes/cherry-pick.md | 55 +++++++++++++++++++++++++++++++++++++
  1 file changed, 55 insertions(+)
 ```
