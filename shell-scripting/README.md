@@ -94,7 +94,7 @@ Output:
 My name is Prateek Singh
 My roll number is 24BCS10135
 I am learning DevOps
-Today is Mon Aug 31 12:11:26 UTC 2026
+Today is Mon Aug 31 13:35:46 UTC 2026
 ```
 
 `$(date)` runs the command and puts its output in the variable.
@@ -251,6 +251,10 @@ This is a function to show information
 Hello Prateek, welcome to the DevOps class
 ```
 
+Screenshot of `redirect.sh`, `variable.sh` and `function.sh` running:
+
+![redirect.sh, variable.sh and function.sh running in the terminal](screenshots/practice-scripts-run.png)
+
 ## 10. system_info.sh (the homework)
 
 Commands used: `read -p` for input, `date`, `hostname`, `whoami`, `df -h` for disk usage,
@@ -293,9 +297,12 @@ echo "Process list saved in $folder_name/process.log"
 Output:
 
 ```
+Enter your name: Prateek Singh
+Enter your roll number: 24BCS10135
+Enter a folder name: system_report
 Name: Prateek Singh
 Roll number: 24BCS10135
-Date: Mon Aug 31 12:42:49 UTC 2026
+Date: Mon Aug 31 13:34:59 UTC 2026
 Hostname: devops-lab
 Username: root
 
@@ -304,29 +311,42 @@ Filesystem            Size  Used Avail Use% Mounted on
 overlay               911G   55G  811G   7% /
 tmpfs                  64M     0   64M   0% /dev
 shm                    64M     0   64M   0% /dev/shm
-/run/host_mark/Users  927G  274G  654G  30% /home/work
+/run/host_mark/Users  927G  273G  654G  30% /home/work
 /dev/vda1             911G   55G  811G   7% /etc/hosts
 tmpfs                 7.8G     0  7.8G   0% /proc/scsi
 tmpfs                 7.8G     0  7.8G   0% /sys/firmware
 
 Running processes:
     PID TTY          TIME CMD
-   4159 ?        00:00:00 bash
-   4167 ?        00:00:00 system_info.sh
-   4174 ?        00:00:00 ps
+   4304 pts/1    00:00:00 bash
+   4325 pts/1    00:00:00 system_info.sh
+   4332 pts/1    00:00:00 ps
 
 Process list saved in system_report/process.log
 ```
 
-Checking the file was written:
+Screenshot of the run:
+
+![system_info.sh running in the terminal](screenshots/system-info-run.png)
+
+Checking the folder and the file were really created:
 
 ```
+$ ls -l system_report/
+total 4
+-rw-r--r-- 1 root root 131 Aug 31 13:34 process.log
+
 $ cat system_report/process.log
     PID TTY          TIME CMD
-   4159 ?        00:00:00 bash
-   4167 ?        00:00:00 system_info.sh
-   4175 ?        00:00:00 ps
+   4304 pts/1    00:00:00 bash
+   4325 pts/1    00:00:00 system_info.sh
+   4333 pts/1    00:00:00 ps
 ```
+
+![checking process.log in the terminal](screenshots/process-log-check.png)
+
+The PID of `ps` is 4333 in the file but 4332 on the screen, because the script runs `ps`
+twice, once for the screen and once for the file, and each run is a new process.
 
 ## Mistakes I made
 

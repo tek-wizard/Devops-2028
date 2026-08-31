@@ -190,8 +190,16 @@ sys
 
 ## Step 7: looking at the networks
 
+Plain `docker network inspect` prints a lot of JSON, so I used `--format` to pull out only
+the parts I wanted:
+
 ```bash
-$ docker network inspect frontend-net
+$ docker network inspect frontend-net --format 'Name: {{.Name}}
+Driver: {{.Driver}}
+Subnet: {{range .IPAM.Config}}{{.Subnet}}  Gateway: {{.Gateway}}{{end}}
+Containers:
+{{range .Containers}}  {{.Name}} -> {{.IPv4Address}}
+{{end}}'
 Name: frontend-net
 Driver: bridge
 Subnet: 172.20.0.0/16  Gateway: 172.20.0.1
@@ -206,10 +214,16 @@ This is the part that made it click for me:
 
 ```bash
 $ docker exec backend ip addr
-11: eth0: inet 172.21.0.2/16 scope global eth0
-12: eth1: inet 172.20.0.3/16 scope global eth1
-14: eth2: inet 172.22.0.3/16 scope global eth2
+11: eth0@if4277: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP
+    inet 172.21.0.2/16 brd 172.21.255.255 scope global eth0
+12: eth1@if4279: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP
+    inet 172.20.0.3/16 brd 172.20.255.255 scope global eth1
+14: eth2@if4282: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP
+    inet 172.22.0.3/16 brd 172.22.255.255 scope global eth2
 ```
+
+I have only kept the `eth` lines here. The full output also lists `lo` and a set of tunnel
+interfaces that are there in every container.
 
 **Three networks means three network interfaces.** The container really gets a separate
 network card for each network it is on.

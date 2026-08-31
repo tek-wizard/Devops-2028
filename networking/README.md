@@ -109,15 +109,18 @@ Taking `192.168.10.0/24` and borrowing 2 bits makes it /26:
 - Subnets = 2^2 = **4**
 - Mask becomes 255.255.255.192
 
-```bash
-$ ipcalc 192.168.10.0/24 -s 62 62 62 62
-Network:   192.168.10.0/26     HostMin: 192.168.10.1    HostMax: 192.168.10.62    Broadcast: 192.168.10.63
-Network:   192.168.10.64/26    HostMin: 192.168.10.65   HostMax: 192.168.10.126   Broadcast: 192.168.10.127
-Network:   192.168.10.128/26   HostMin: 192.168.10.129  HostMax: 192.168.10.190   Broadcast: 192.168.10.191
-Network:   192.168.10.192/26   HostMin: 192.168.10.193  HostMax: 192.168.10.254   Broadcast: 192.168.10.255
-```
+Working out all four subnets by hand, and then I checked them with
+`ipcalc 192.168.10.0/24 -s 62 62 62 62`:
 
-The networks go up by 64 each time, because 256 divided by 4 subnets is 64.
+| Subnet | Network | First host | Last host | Broadcast |
+|---|---|---|---|---|
+| 1 | 192.168.10.0/26 | 192.168.10.1 | 192.168.10.62 | 192.168.10.63 |
+| 2 | 192.168.10.64/26 | 192.168.10.65 | 192.168.10.126 | 192.168.10.127 |
+| 3 | 192.168.10.128/26 | 192.168.10.129 | 192.168.10.190 | 192.168.10.191 |
+| 4 | 192.168.10.192/26 | 192.168.10.193 | 192.168.10.254 | 192.168.10.255 |
+
+The networks go up by 64 each time, because 256 divided by 4 subnets is 64. The first host is
+always the network address plus 1 and the last host is the broadcast minus 1.
 
 | Slash | Mask | Subnets | Hosts each |
 |---|---|---|---|

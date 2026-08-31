@@ -128,13 +128,20 @@ It made the account but **did not create the home folder**, and the shell is `/b
 
 ## adduser
 
+Normally `adduser testuser2` stops and asks for a password and then the full name, room
+number and phone numbers. I was capturing the output into a file, so I passed those in as
+flags to let it finish in one go:
+
 ```bash
-$ adduser testuser2
+$ adduser --disabled-password --gecos "Prateek Test User,101,,," testuser2
 info: Adding user `testuser2' ...
+info: Selecting UID/GID from range 1000 to 59999 ...
 info: Adding new group `testuser2' (1002) ...
-info: Adding new user `testuser2' (1002) with group `testuser2' ...
+info: Adding new user `testuser2' (1002) with group `testuser2 (1002)' ...
 info: Creating home directory `/home/testuser2' ...
 info: Copying files from `/etc/skel' ...
+info: Adding new user `testuser2' to supplemental / extra groups `users' ...
+info: Adding user `testuser2' to group `users' ...
 
 $ grep testuser2 /etc/passwd
 testuser2:x:1002:1002:Prateek Test User,101,,:/home/testuser2:/bin/bash
@@ -145,8 +152,8 @@ $ ls -la /home/testuser2
 -rw-r--r-- 1 testuser2 testuser2  807 Aug 31 11:33 .profile
 ```
 
-It created the home folder, copied the starter files, used `/bin/bash`, and it also asks for
-the password and full name while running.
+It created the home folder, copied the starter files from `/etc/skel`, used `/bin/bash`, and
+added the user to an extra group. It also printed every step, which `useradd` does not do.
 
 ## Both users side by side
 
@@ -277,12 +284,16 @@ See "systemctl status nginx.service" and "journalctl -xeu nginx.service" for det
 
 ```bash
 $ journalctl -u nginx -n 6
-Aug 31 11:35:21 systemd-lab systemd[1]: Starting nginx.service...
-Aug 31 11:35:21 systemd-lab nginx[162]: [emerg] unknown directive "this_is_not_valid_nginx_config" in /etc/nginx/nginx.conf:84
-Aug 31 11:35:21 systemd-lab nginx[162]: nginx: configuration file test failed
+Aug 31 11:35:21 systemd-lab nginx[162]: nginx: configuration file /etc/nginx/nginx.conf test failed
 Aug 31 11:35:21 systemd-lab systemd[1]: nginx.service: Control process exited, code=exited, status=1/FAILURE
-Aug 31 11:35:21 systemd-lab systemd[1]: Failed to start nginx.service.
+Aug 31 11:35:21 systemd-lab systemd[1]: nginx.service: Failed with result 'exit-code'.
+Aug 31 11:35:21 systemd-lab systemd[1]: Failed to start nginx.service - A high performance web server...
+Aug 31 11:35:30 systemd-lab systemd[1]: Starting nginx.service - A high performance web server...
+Aug 31 11:35:30 systemd-lab systemd[1]: Started nginx.service - A high performance web server...
 ```
+
+The last two lines are from after I fixed the config, because `-n 6` shows the newest six
+lines. The line that matters is the `nginx[162]` one naming the bad directive.
 
 This is the useful part. `systemctl restart` only said it failed, but the journal gave the
 bad line and even the line number in the config file, line 84.
@@ -429,15 +440,27 @@ chown user:group file    # change owner
 ## Processes
 
 ```bash
-$ ps aux | head -4
-USER   PID %CPU %MEM   VSZ  RSS TTY STAT START TIME COMMAND
-root     1  0.0  0.0  4300 3608 pts/0 Ss+ 11:28 0:00 bash
-root  3804  0.0  0.0  2272 1276 ?     S   11:36 0:00 sleep 600
-root  3805  0.0  0.0  2272 1284 ?     S   11:36 0:00 sleep 600
+$ sleep 600 &
+$ sleep 600 &
 
-$ kill 3804
-$ kill -9 3805
+$ ps aux | head -4
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  0.0  0.0   4300  3608 pts/0    Ss+  11:28   0:00 bash
+root        4283  0.0  0.0   4036  3032 ?        Ss   13:28   0:00 bash /root/psrun.sh
+root        4289  0.0  0.0   2272  1284 ?        S    13:28   0:00 sleep 600
+
+$ ps -ef | grep -w sleep | grep -v grep
+root        4289    4283  0 13:28 ?        00:00:00 sleep 600
+root        4290    4283  0 13:28 ?        00:00:00 sleep 600
+
+$ kill 4289
+$ kill -9 4290
+[2]+  Killed                  sleep 600
 ```
+
+In `ps -ef` the second column is the PID and the third is the PPID, the parent's PID. Both
+sleeps show 4283 as their parent. I ran them from a small script instead of typing them one by
+one, which is why `bash /root/psrun.sh` is in the list and is their parent.
 
 | Command | What it does |
 |---|---|
