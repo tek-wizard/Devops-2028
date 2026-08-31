@@ -1,0 +1,16 @@
+# Kept only for the size comparison in the README.
+# This is the same app built the naive way, everything in one stage,
+# so the whole node toolchain and node_modules end up in the final image.
+FROM node:22-alpine
+
+WORKDIR /app
+
+COPY package.json ./
+RUN npm install
+
+COPY . .
+RUN npm run build
+
+EXPOSE 4173
+
+CMD ["npx", "vite", "preview", "--host", "0.0.0.0", "--port", "4173"]

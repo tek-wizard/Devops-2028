@@ -1,0 +1,13 @@
+# Kept only for the size comparison in the README.
+# One stage, so the whole JDK including the compiler stays in the image
+# even though running the app only needs the JRE.
+FROM eclipse-temurin:21-jdk-alpine
+
+WORKDIR /app
+
+COPY Main.java .
+RUN javac Main.java
+
+EXPOSE 8080
+
+CMD ["java", "Main"]
