@@ -580,6 +580,10 @@ Exactly the same start time as before the edit, and "Up 3 minutes" with no resta
 
 `http://localhost:8085` after the edit
 
+The copy of `index.html` kept in this repo is the original "Hello students" version, so that
+the task can be run again from the start. The edit above is the second version, shown in the
+output and the screenshot.
+
 The reason this works is that a bind mount is not a copy. The folder from my laptop is
 mounted into the container's filesystem, so both sides are looking at the same bytes on the
 same disk. There is nothing to sync. nginx opens the file fresh on each request and reads
