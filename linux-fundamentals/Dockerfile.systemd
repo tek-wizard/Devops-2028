@@ -1,0 +1,10 @@
+# Ubuntu with systemd running as PID 1, so journalctl has a real journal to read.
+# The plain ubuntu:24.04 image has no systemd, so journalctl finds nothing there.
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update -qq && apt-get install -y -qq systemd systemd-sysv nginx procps && \
+    rm -rf /var/lib/apt/lists/*
+
+CMD ["/sbin/init"]

@@ -611,13 +611,13 @@ something is broken, working up from the bottom is much faster than guessing.
 
 Going bottom up saves a lot of guessing:
 
-1. `ip addr` — do I even have an address, and is the link up
-2. `ip route` — is there a default route
-3. `ping <gateway>` — can I reach my own router
-4. `ping 8.8.8.8` — can I reach the internet by IP
-5. `ping google.com` — does DNS work
-6. `nc -zv host port` — is the service's port open
-7. `curl -I url` — is the application actually replying
+1. `ip addr`: do I even have an address, and is the link up
+2. `ip route`: is there a default route
+3. `ping <gateway>`: can I reach my own router
+4. `ping 8.8.8.8`: can I reach the internet by IP
+5. `ping google.com`: does DNS work
+6. `nc -zv host port`: is the service's port open
+7. `curl -I url`: is the application actually replying
 
 Where it first fails tells you which layer to fix. Steps 4 and 5 are the pair that separates
 a connectivity problem from a DNS problem, which is the most common confusion of the lot.
@@ -685,12 +685,12 @@ the backend container could reach MySQL.
 Without DHCP every device would need its address typed in by hand. DHCP hands them out
 automatically in four steps, remembered as DORA:
 
-1. **Discover** — the new device broadcasts to 255.255.255.255 asking if there is a DHCP
+1. **Discover**: the new device broadcasts to 255.255.255.255 asking if there is a DHCP
    server, since it has no address yet and cannot address anyone directly.
-2. **Offer** — a server replies offering an address, a mask, a gateway and DNS servers.
-3. **Request** — the device says yes to that offer, still by broadcast, so any other DHCP
+2. **Offer**: a server replies offering an address, a mask, a gateway and DNS servers.
+3. **Request**: the device says yes to that offer, still by broadcast, so any other DHCP
    servers know their offers were not taken.
-4. **Acknowledge** — the server confirms and records the lease.
+4. **Acknowledge**: the server confirms and records the lease.
 
 The address is a **lease** with an expiry, not a permanent gift, and the device renews it
 part way through. This is where `169.254.x.x` comes from: if no DHCP server answers, the
