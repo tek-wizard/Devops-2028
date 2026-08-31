@@ -83,9 +83,11 @@ That is why the hostname in the Linux output is `devops-lab` or `systemd-lab` an
   learned from.
 - Each section README ends with a short list of what I took away and, where relevant, a table
   of the mistakes I hit and the fix.
-- The cherry-pick exercise from session 5 was done on this repository, so the
-  `feature/git-notes` branch and the cherry-picked commit are part of the real history and can
-  be checked with `git log --oneline --graph --all`.
+- The cherry-pick exercise from session 5 was done on this repository rather than in a
+  throwaway folder, so it is part of the real history. The branch was merged back into main
+  and deleted afterwards, but the merge commit keeps the shape, so
+  `git log --oneline --graph` still shows the branch splitting off, the cherry-picked commit
+  on main, and the original commit it was copied from.
 - Generated folders, cloned repositories and build output are kept out with `.gitignore`.
 
 ## Environment

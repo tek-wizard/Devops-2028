@@ -324,6 +324,62 @@ git tries to apply that change again. It normally works out that the result is a
 and skips it, but it can also raise a conflict that looks confusing when the content is
 already correct.
 
+## Step 8: merging the branch afterwards
+
+Once the exercise was done I merged the branch into main so all four note files live in one
+place, and then deleted the branch.
+
+```bash
+$ git switch main
+$ git merge --no-ff feature/git-notes -m "Merge the git notes branch into main after the cherry-pick exercise"
+Merge made by the 'ort' strategy.
+ git-and-github/notes/branching.md       | 30 +++++++++++++++++++++++++
+ git-and-github/notes/undoing-changes.md | 40 +++++++++++++++++++++++++++++++++
+ 2 files changed, 70 insertions(+)
+ create mode 100644 git-and-github/notes/branching.md
+ create mode 100644 git-and-github/notes/undoing-changes.md
+
+$ ls git-and-github/notes/
+branching.md  cherry-pick.md  git-basics.md  undoing-changes.md
+
+$ git branch -d feature/git-notes
+Deleted branch feature/git-notes
+```
+
+Only `branching.md` and `undoing-changes.md` came across in the merge. `cherry-pick.md` was
+already on main from the cherry-pick, and both sides had byte for byte identical content, so
+git had nothing to do for that file and did not raise a conflict.
+
+I used `--no-ff` so that a merge commit gets recorded. That matters here, because the merge
+commit is what keeps the shape of the history visible after the branch pointer is gone:
+
+```bash
+$ git log --oneline --graph -10
+*   078c037 Merge the git notes branch into main after the cherry-pick exercise
+|\
+| * bc8812b Add notes on undoing changes with reset and revert
+| * ae8b9a3 Add notes on cherry-pick and when to use it
+| * f48dbe7 Add notes on branches and HEAD
+* | ea604bd Update the commit hashes in the git notes to match the repository history
+* | b6fe0fc Add enrollment number to every section
+* | f34cac2 Keep the original bind mount page in the repo so the task can be rerun
+* | f8e24b4 Add the systemd Dockerfile used for the journalctl task and tidy the networking notes
+* | ac8f37c Add session 5 git notes, the cherry-pick writeup and the main README
+* | 84c45a1 Add notes on cherry-pick and when to use it
+|/
+```
+
+There is only one branch in the repository now, and the whole exercise is still readable in
+this one drawing. The three branch commits are on the indented line, the merge commit at the
+top joins them back in, and **both copies of the cherry-picked change are visible at once**:
+`ae8b9a3` on the branch line and `84c45a1` on the main line. Same change, two commits, which
+is the point the exercise was about.
+
+That also shows what deleting a branch does and does not do. `git branch -d` removes a
+pointer, not commits. The commits are still reachable through the merge commit, which is why
+`-d` refuses to delete a branch that has not been merged, since those commits really would
+become unreachable.
+
 ## What I understood about when to use it
 
 The situation cherry-pick is built for: a bug fix committed on a feature branch that is only
