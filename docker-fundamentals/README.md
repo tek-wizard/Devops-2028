@@ -5,8 +5,11 @@
 
 My notes from the Docker basics session, with the commands I ran.
 
-The Dockerfiles and applications are in [docker-images](../docker-images) and the networking
-part is in [docker-networking](../docker-networking).
+The rest of the Docker homework is in these folders:
+
+- [docker-images](../docker-images) has the six Hello World applications with a Dockerfile each
+- [docker-multi-stage](../docker-multi-stage) has the multi-stage build homework
+- [docker-networking](../docker-networking) has the networks, host network, bind mount and volumes
 
 ## What Docker is for
 
