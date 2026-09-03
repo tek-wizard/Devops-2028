@@ -3,17 +3,32 @@
 **Name:** Prateek Singh
 **Enrollment number:** 24BCS10135
 
-## Homework
+## Homework tasks
 
-1. Create three containers (frontend, backend and DB) using three different networks. Use
-   nginx or Alpine for frontend and backend and MySQL for the DB. Create three networks, add
-   the backend container to two networks, and check the connectivity between each container.
-2. Use the Apache2 image with the host network, pull it from Docker Hub, create a container
-   with the host network and access it on port 80.
-3. Bind mount exercise: make a folder with an `index.html` saying "Hello students", bind mount
-   it to an nginx container, access the site, then change the file and check the change shows
-   without restarting the container. Add screenshots.
-4. Research overlay networks and how they work across multiple Docker hosts.
+**Task 1: Docker Container Networking**
+- Create 3 containers: Frontend, Backend, Database.
+- Use Nginx or Alpine images for the frontend and backend.
+- Use the MySQL image for the database.
+- Create 3 different Docker networks.
+- Add the backend container to 2 networks.
+- Check connectivity between the containers.
+
+**Task 2: Host Network**
+- Pull the Apache2 image from Docker Hub.
+- Create an Apache2 container using the host network.
+- Access the Apache website directly on port 80.
+
+**Task 3: Bind Mount**
+- Create a folder on my local machine.
+- Create an `index.html` file with "Hello students" as the content.
+- Bind mount the folder to an Nginx container.
+- Access the Nginx website and verify the content.
+- Modify the `index.html` file.
+- Verify that the changes are reflected without restarting the container.
+
+**Task 4: Overlay Network**
+- Research Docker overlay networks and their use cases.
+- Understand how overlay networks work across multiple Docker hosts.
 
 ---
 
@@ -43,7 +58,7 @@ have to use IP addresses. That is why all the tasks below create their own netwo
 
 ---
 
-# Task 1: Three containers on three networks
+# Task 1: Docker Container Networking
 
 ## Step 1: create the networks
 
@@ -208,6 +223,14 @@ Containers:
   backend -> 172.20.0.3/16
 ```
 
+## Connectivity summary
+
+![checking connectivity between the three containers](screenshots/container-connectivity.png)
+
+This one screenshot covers the whole task: the three networks, which networks each container
+is on with its IP, frontend reaching backend, backend reaching the database on port 3306, and
+frontend failing to reach the database because they share no network.
+
 ## What the container sees
 
 This is the part that made it click for me:
@@ -238,7 +261,7 @@ bad address earlier when the containers were on different networks.
 
 ---
 
-# Task 2: Apache with the host network
+# Task 2: Host Network
 
 ```bash
 $ docker pull httpd:2.4
@@ -312,7 +335,7 @@ bc5b52a44c7c   httpd:2.4   "httpd-foreground"   Up 3 seconds   0.0.0.0:80->80/tc
 Comparing the two `docker ps` lines is the clearest difference. The host network has an empty
 PORTS column and the bridge one shows `0.0.0.0:80->80/tcp`.
 
-![Apache on port 80](screenshots/apache-on-port-80.jpg)
+![Apache served on port 80 with the host network](screenshots/apache-host-network-port80.png)
 
 ## bridge and host compared
 
@@ -330,7 +353,7 @@ containers, and two containers can never both use port 80.
 
 ---
 
-# Task 3: Bind mount
+# Task 3: Bind Mount
 
 ## Step 1: the folder on my laptop
 
@@ -388,7 +411,7 @@ $ curl http://localhost:8085
 </html>
 ```
 
-![Hello students page](screenshots/bind-mount-before-edit.jpg)
+![the bind mounted page showing Hello students](screenshots/bind-mount-before-edit.png)
 
 ## Step 4: change the file
 
@@ -425,7 +448,7 @@ nginx-bind Up 3 minutes
 
 Same start time as before the edit.
 
-![Page after editing the file](screenshots/bind-mount-after-edit.jpg)
+![the page after editing the file, container not restarted](screenshots/bind-mount-after-edit.png)
 
 The copy of `index.html` in this repo is the original "Hello students" one, so the task can be
 run again from the start.
@@ -479,7 +502,7 @@ the volume and not in the container.
 
 ---
 
-# Task 4: Overlay networks
+# Task 4: Overlay Network
 
 This is the research part. I could not actually build one because an overlay network needs more
 than one Docker host and I only have one laptop, so these are notes from the Docker docs.
@@ -546,7 +569,7 @@ Kubernetes networking later.
 # All the commands together
 
 ```bash
-# Task 1
+# Task 1: container networking
 docker network create frontend-net
 docker network create backend-net
 docker network create db-net
@@ -559,11 +582,11 @@ docker exec frontend ping -c 2 backend          # works
 docker network connect db-net backend
 docker exec frontend ping -c 2 db               # still fails, which is correct
 
-# Task 2
+# Task 2: host network
 docker pull httpd:2.4
 docker run -d --name apache-host --network host httpd:2.4
 
-# Task 3
+# Task 3: bind mount
 cd bind-mount-demo
 docker run -d --name nginx-bind -p 8085:80 -v "$PWD":/usr/share/nginx/html:ro nginx:alpine
 curl http://localhost:8085

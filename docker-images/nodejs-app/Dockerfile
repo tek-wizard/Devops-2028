@@ -1,30 +1,14 @@
-# ------------------------------------------------------------------
-# Stage 1: build the React app
-# The whole toolchain (node, npm, vite, all the dev dependencies)
-# is only needed here to turn the JSX into plain files.
-# ------------------------------------------------------------------
-FROM node:22-alpine AS build
+FROM node:22-alpine
 
 WORKDIR /app
 
-# package.json is copied on its own first so that Docker can cache the
-# npm install layer. If only my source code changes, the install is not
-# repeated on the next build.
+# package.json is copied first so the npm install layer stays cached
+# when only my code changes
 COPY package.json ./
 RUN npm install
 
-COPY . .
-RUN npm run build
+COPY server.js ./
 
-# ------------------------------------------------------------------
-# Stage 2: serve the built files
-# Nothing from stage 1 comes across except the finished dist folder,
-# so node and node_modules are not in the final image at all.
-# ------------------------------------------------------------------
-FROM nginx:alpine
+EXPOSE 3000
 
-COPY --from=build /app/dist /usr/share/nginx/html
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npm", "start"]

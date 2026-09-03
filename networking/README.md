@@ -3,10 +3,18 @@
 **Name:** Prateek Singh
 **Enrollment number:** 24BCS10135
 
-## Homework
+## Homework tasks
 
-Practise the networking commands from the session, mainly `ping` and subnetting with the
-special IP addresses, and put what I understood in an MD file with the output.
+**Task 1**
+- Practice the commands and the repos shared in the devops-heros GitHub repo.
+
+**Task 2**
+- Create a Markdown file.
+- Execute the networking commands and add the output and screenshots to the file.
+- Add a short explanation of what I understood about each command.
+
+This file is that Markdown file. Every command below has its output and a short note on what
+it does.
 
 ---
 
@@ -319,6 +327,10 @@ content-type: text/html; charset=utf-8
 ```
 
 `-I` gets only the headers, so it is a quick way to check a website is working.
+
+## Screenshot of the commands running
+
+![networking commands running in the terminal](screenshots/networking-commands.png)
 
 ## Command summary
 

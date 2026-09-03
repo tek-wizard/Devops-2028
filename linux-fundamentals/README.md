@@ -3,18 +3,34 @@
 **Name:** Prateek Singh
 **Enrollment number:** 24BCS10135
 
-## Homework
+## Homework tasks
 
-1. Learn about soft links and hard links.
-2. Find the difference between `adduser` and `useradd`, and which one is the standard way.
-3. Learn about the `journalctl` command.
-4. Go through the Linux command cheat sheet.
+**Task 1: Soft Link and Hard Link**
+- Learn the difference between soft links and hard links.
+- Learn the commands to create both.
+- Practice creating and deleting soft and hard links.
+- Prepare for this as an interview question.
+
+**Task 2: `adduser` vs `useradd`**
+- Learn the difference between `adduser` and `useradd`.
+- Understand which command is preferred on Ubuntu/Linux and why.
+- Create a test user using the recommended command.
+
+**Task 3: `journalctl`**
+- Learn what `journalctl` is used for.
+- Learn how to view system and service logs using `journalctl`.
+- Practice checking logs for a specific service.
+
+**Task 4: Linux Command Cheat Sheet**
+- Review the Linux command cheat sheet.
+- Practice the important commands covered in the cheat sheet.
+- Understand the purpose and basic usage of each command.
 
 I ran everything in an Ubuntu container because my laptop is a MacBook.
 
 ---
 
-# 1. Soft links and hard links
+# Task 1: Soft Link and Hard Link
 
 Every file has an **inode**, which holds the actual data and the file details. The filename
 is just a label that points to the inode number.
@@ -75,6 +91,50 @@ ln: failed to create hard link: Invalid cross-device link
 A hard link cannot point to a directory and cannot go across two different filesystems. A
 soft link can do both, because it only stores a path.
 
+## Deleting links
+
+Deleting a link is just `rm`, but what it does to the other files is the part worth knowing.
+
+```bash
+$ echo "This is the original file" > original.txt
+$ ln original.txt hardlink.txt
+$ ln -s original.txt softlink.txt
+$ ls -li
+total 8
+ 823499 -rw-r--r-- 2 root root 26 Sep  3 11:22 hardlink.txt
+ 823499 -rw-r--r-- 2 root root 26 Sep  3 11:22 original.txt
+1396006 lrwxrwxrwx 1 root root 12 Sep  3 11:22 softlink.txt -> original.txt
+```
+
+Deleting the hard link:
+
+```bash
+$ rm hardlink.txt
+$ ls -li
+total 4
+ 823499 -rw-r--r-- 1 root root 26 Sep  3 11:22 original.txt
+1396006 lrwxrwxrwx 1 root root 12 Sep  3 11:22 softlink.txt -> original.txt
+```
+
+The link count on `original.txt` went from 2 back to 1, and the file itself is fine. The
+data only goes away when the count reaches 0.
+
+Deleting the soft link:
+
+```bash
+$ rm softlink.txt
+$ ls -li
+total 4
+823499 -rw-r--r-- 1 root root 26 Sep  3 11:22 original.txt
+$ cat original.txt
+This is the original file
+```
+
+Only the link was removed and the original is untouched. `rm` on a soft link deletes the
+link and not the file it points to. `unlink softlink.txt` does the same thing.
+
+![creating and deleting soft and hard links](screenshots/soft-and-hard-links.png)
+
 ## Difference
 
 | | Hard link | Soft link |
@@ -98,7 +158,7 @@ lrwxrwxrwx 1 root root 10 Nov 12  2025 /usr/bin/python3 -> python3.12
 
 ---
 
-# 2. adduser vs useradd
+# Task 2: adduser vs useradd
 
 ```bash
 $ ls -l /usr/sbin/useradd /usr/sbin/adduser
@@ -180,6 +240,11 @@ testuser3:x:1003:1003:Prateek Singh:/home/testuser3:/bin/bash
 - `-s` sets the shell
 - `-c` is the comment, usually the full name
 
+Creating a test user with the recommended command, and showing what plain `useradd` leaves
+out:
+
+![creating a test user with useradd](screenshots/useradd-test-user.png)
+
 ## Difference
 
 | | useradd | adduser |
@@ -217,7 +282,7 @@ id username                  # UID, GID and groups
 
 ---
 
-# 3. journalctl
+# Task 3: journalctl
 
 On systems using systemd, all the logs go into one place instead of separate text files in
 `/var/log`. The journal is a binary file so `cat` cannot read it. `journalctl` is the command
@@ -314,12 +379,16 @@ $ journalctl -p err -n 10
 Aug 31 11:35:21 systemd-lab systemd[1]: Failed to start nginx.service.
 ```
 
+## Checking the logs of one specific service
+
+![journalctl logs for the nginx service](screenshots/journalctl-service-logs.png)
+
 **Short answer:** `journalctl` reads the systemd journal, which is where all logs go on a
 systemd machine. `journalctl -xeu servicename` is what shows why a service failed.
 
 ---
 
-# 4. Linux command cheat sheet
+# Task 4: Linux Command Cheat Sheet
 
 I went through the cheat sheet and ran the commands.
 

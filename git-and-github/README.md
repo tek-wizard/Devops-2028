@@ -3,11 +3,21 @@
 **Name:** Prateek Singh
 **Enrollment number:** 24BCS10135
 
-## Homework
+## Homework tasks
 
-1. Try `git commit -a -m` and find how it is different from `git commit -m`.
-2. Practise cherry-picking: make 2 to 4 commits on main, look at `git log`, make a new branch,
-   make 2 to 3 commits on it, then cherry-pick one commit from the branch onto main.
+**Task 1: `git commit -a -m`**
+- Practice `git commit -a -m "message"`.
+- Understand the difference between `git commit -a -m` and `git commit -m`.
+- Test both commands and observe the difference.
+
+**Task 2: Git Cherry-Pick**
+- Create 2 to 4 commits in the main branch.
+- Use `git log` to view the commits.
+- Create a new branch.
+- Make 2 to 3 commits in the new branch.
+- Use `git log` to identify a specific commit.
+- Cherry-pick one specific commit from the new branch into the main branch.
+- Verify that the selected commit is now available in the main branch.
 
 I did the exercise in this repository itself, so it is part of the real history and can be
 checked with `git log --oneline --graph`.
@@ -17,7 +27,7 @@ exercise commits.
 
 ---
 
-# 1. git commit -m and git commit -a -m
+# Task 1: git commit -a -m
 
 I thought `-a` meant add everything, so it would be the same as `git add .` then
 `git commit -m`. That is wrong.
@@ -76,7 +86,7 @@ goes together.
 
 ---
 
-# 2. Cherry-pick exercise
+# Task 2: Git Cherry-Pick
 
 ## Step 1: commits on main
 
@@ -229,6 +239,13 @@ $ git diff feature/git-notes:git-and-github/notes/cherry-pick.md main:git-and-gi
 
 **So cherry-pick copies the change, not the commit.** It makes a new commit on the current
 branch with the same change, and the hash is different because the parent commit is different.
+
+## Verifying the commit is now in main
+
+![git log graph showing the cherry-pick](screenshots/git-log-graph.png)
+
+Both commits are visible in this one view. `ae8b9a3` is the original on the branch line and
+`84c45a1` is the cherry-picked copy on the main line, so the change really is in main.
 
 ## Step 8: merging the branch after
 

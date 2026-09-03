@@ -3,12 +3,24 @@
 **Name:** Prateek Singh
 **Enrollment number:** 24BCS10135
 
-## Homework
+## Homework task
 
-Write a shell script that prints the date, hostname, username, disk usage and running
-processes. It should use variables, take input with `read`, create a directory and save the
-process info in a file inside that directory, using `mkdir`, `touch`, `echo`, `df`, `ps`,
-`>` and `read -p`.
+**Task: System Information Script**
+
+Create a shell script that:
+- Prints the current date.
+- Prints the hostname.
+- Prints the username.
+- Prints the disk usage.
+- Prints the running processes.
+- Uses variables to store and use data.
+- Takes user input using `read -p`.
+- Creates a directory using `mkdir`.
+- Creates a file using `touch`.
+- Stores the running processes information in the file using `>` output redirection.
+
+Commands to use: `mkdir`, `touch`, `echo`, `df`, `ps`, `read -p`, variables, and `>` output
+redirection.
 
 That script is [`system_info.sh`](system_info.sh). The other scripts are the class practice.
 
