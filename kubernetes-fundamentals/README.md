@@ -88,6 +88,11 @@ means it is a worker. The container runtime is containerd and not Docker, which 
 at first. Kubernetes stopped using Docker directly a few versions ago and talks to containerd
 instead.
 
+![cluster nodes and namespaces](screenshots/cluster-and-namespaces.png)
+
+The namespace list in the screenshot has `ingress-nginx` in it as well, because I took it
+after doing the ingress homework later on.
+
 The first time I ran `kubectl get nodes` both nodes said `NotReady`, because the network
 plugin was still starting. After about 20 seconds they turned `Ready`.
 
@@ -109,6 +114,8 @@ kube-proxy-99dh4                                    1/1     Running   0         
 kube-proxy-9k6tl                                    1/1     Running   0          21s   172.26.0.3   devops-2028-control-plane
 kube-scheduler-devops-2028-control-plane            1/1     Running   0          27s   172.26.0.3   devops-2028-control-plane
 ```
+
+![pods in the kube-system namespace](screenshots/kube-system-pods.png)
 
 Things I noticed reading this:
 
@@ -203,6 +210,8 @@ first-pod   1/1     Running   0          12s   10.244.1.2   devops-2028-worker
 is from the pod network and not the node network, and the scheduler put it on the worker
 node.
 
+![creating the first pod](screenshots/first-pod.png)
+
 Looking closer with `describe`:
 
 ```text
@@ -223,6 +232,12 @@ Events:
   Normal  Created    0s    kubelet            Container created
   Normal  Started    0s    kubelet            Container started
 ```
+
+![the events section of kubectl describe](screenshots/describe-pod-events.png)
+
+In the screenshot the `Pulled` line says the image was already on the machine, because by
+then I had run this a second time and the image was cached. The first time it said it pulled
+the image and how long that took.
 
 The Events at the bottom are the useful part, and they show the architecture working in
 order: the **scheduler** picked the node, then the **kubelet** on that node pulled the image

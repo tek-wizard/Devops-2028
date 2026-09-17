@@ -115,6 +115,8 @@ web-loadbalancer   10.244.1.21:80,10.244.1.22:80   6s
 web-nodeport       10.244.1.21:80,10.244.1.22:80   6s
 ```
 
+![services and their endpoints](screenshots/services-and-endpoints.png)
+
 The endpoints are exactly the two Pod IPs from earlier. So a Service is really just a stable
 name plus a list of Pod IPs that Kubernetes keeps up to date. When a Pod is replaced, its old
 IP drops off the list and the new one is added.
@@ -232,6 +234,12 @@ Name:	web-headless.default.svc.cluster.local
 Address: 10.244.1.22
 ```
 
+![looking up a ClusterIP service and a headless service](screenshots/service-dns.png)
+
+In the screenshot the two lookups are next to each other, which makes the difference obvious.
+The ClusterIP one answers with the single Service IP `10.96.50.237` and the headless one
+answers with both Pod IPs.
+
 Two addresses came back instead of one, and they are the two Pod IPs.
 
 Compared with the ClusterIP Service earlier, which returned the single address
@@ -264,6 +272,8 @@ NAME             ENDPOINTS   AGE
 broken-service   <none>      6s
 ```
 
+![a service with no endpoints](screenshots/empty-endpoints.png)
+
 The Service looks completely healthy in `kubectl get svc`. It has a type, a cluster IP and a
 port, and there is no error anywhere. But its endpoints are `<none>`, so any request to it
 just fails to connect.
@@ -290,17 +300,6 @@ and make them agree.
 | ExternalName | It is only a DNS alias | No | Pointing at something outside the cluster |
 | Headless | Inside, straight to the Pod IPs | No (`None`) | StatefulSets and databases |
 
-## Commands I used
-
-| Command | What it does |
-|---|---|
-| `kubectl get svc` | List Services |
-| `kubectl get endpoints` | Which Pods each Service points to |
-| `kubectl describe svc name` | Details of one Service |
-| `kubectl get pods --show-labels` | Check labels against a selector |
-| `kubectl exec client -- wget -qO- http://name` | Call a Service from inside the cluster |
-| `kubectl exec client -- nslookup name` | Check cluster DNS |
-
 ## Clean up
 
 ```bash
@@ -308,7 +307,7 @@ kubectl delete -f manifests/
 kubectl delete pod client
 ```
 
-## What I understood
+## Main points
 
 - Pod IPs change, so nothing should point at them. A Service is the stable name in front.
 - A Service is really a name plus a list of endpoints, and the endpoint list is just the IPs

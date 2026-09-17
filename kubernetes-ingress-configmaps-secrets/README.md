@@ -47,6 +47,8 @@ ingress-nginx-admission-patch-54sdw         0/1     Completed   2 (42s ago)   56
 ingress-nginx-controller-746c8469d8-cmmsv   1/1     Running     0             56s
 ```
 
+![the ingress controller pods](screenshots/ingress-controller.png)
+
 The two `Completed` ones are Jobs that ran once to set up certificates and then finished, so
 `0/1 Completed` is normal here and not a failure. The controller itself is `Running`.
 
@@ -128,6 +130,8 @@ $ kubectl get secret app-secret -o jsonpath='{.data.DB_USER}' | base64 -d
 prateek
 ```
 
+![the configmap, the secret and decoding one value](screenshots/configmap-and-secret.png)
+
 So a Secret is not safe just because it is a Secret. What it actually gives is that the value
 is not sitting in the image or in the Deployment YAML, access can be restricted separately
 with RBAC, and it is not printed by accident in normal `kubectl get` output. For real
@@ -185,6 +189,8 @@ APP_NAME=DevOps 2028 Homework
 DB_PASSWORD=devops123
 DB_USER=prateek
 ```
+
+![the environment variables inside the running containers](screenshots/env-inside-pods.png)
 
 Both got the config, and the backend also got `DB_USER` because it pulled in the whole
 Secret. Neither value is written anywhere in the Deployment files, they come from the
@@ -273,6 +279,14 @@ $ curl -s http://localhost:8088/api | grep -o '<h1>.*</h1>'
 <h1>This is the BACKEND</h1>
 ```
 
+![both paths going to different apps](screenshots/ingress-routing.png)
+
+And in the browser:
+
+![the frontend on localhost:8088](screenshots/browser-frontend.png)
+
+![the backend on localhost:8088/api](screenshots/browser-backend.png)
+
 Same host, same port, two different applications depending on the path. That is the whole
 point of an Ingress.
 
@@ -302,18 +316,6 @@ Notes on the fields:
 
 ---
 
-## Commands I used
-
-| Command | What it does |
-|---|---|
-| `kubectl get configmap` / `kubectl get secret` | List them |
-| `kubectl get configmap name -o yaml` | See the values |
-| `kubectl get secret name -o jsonpath='{.data.KEY}' \| base64 -d` | Decode one value |
-| `kubectl exec deploy/name -- env` | Check the variables inside a running container |
-| `kubectl get ingress` | List ingress rules |
-| `kubectl describe ingress name` | See the rules and the backends |
-| `kubectl rollout restart deployment/name` | Restart Pods so they pick up new config |
-
 ## Clean up
 
 ```bash
@@ -321,7 +323,7 @@ kubectl delete -f manifests/
 kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.3/deploy/static/provider/kind/deploy.yaml
 ```
 
-## What I understood
+## What I take away from this one
 
 - ConfigMaps and Secrets keep configuration out of the image, so one image works in every
   environment.
