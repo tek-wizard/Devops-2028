@@ -1,0 +1,33 @@
+# A ConfigMap can also hold whole files, not just single values.
+# These two pages get mounted into the containers as index.html.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-page
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+      <head><title>Frontend</title></head>
+      <body style="font-family: sans-serif; text-align: center; margin-top: 80px;">
+        <h1>This is the FRONTEND</h1>
+        <p>Reached through the ingress on path /</p>
+        <p>Prateek Singh, 24BCS10135</p>
+      </body>
+    </html>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-page
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+      <head><title>Backend</title></head>
+      <body style="font-family: sans-serif; text-align: center; margin-top: 80px;">
+        <h1>This is the BACKEND</h1>
+        <p>Reached through the ingress on path /api</p>
+        <p>Prateek Singh, 24BCS10135</p>
+      </body>
+    </html>

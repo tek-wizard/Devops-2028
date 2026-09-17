@@ -1,0 +1,12 @@
+# Broken on purpose: this selector does not match any Pod,
+# so the Service ends up with no endpoints.
+apiVersion: v1
+kind: Service
+metadata:
+  name: broken-service
+spec:
+  selector:
+    app: this-label-does-not-exist
+  ports:
+    - port: 80
+      targetPort: 80

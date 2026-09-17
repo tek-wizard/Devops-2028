@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          # the page comes from a ConfigMap mounted as a file
+          volumeMounts:
+            - name: page
+              mountPath: /usr/share/nginx/html
+          # every key of the ConfigMap becomes an environment variable
+          envFrom:
+            - configMapRef:
+                name: app-config
+          # and one value is taken out of the Secret
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: DB_PASSWORD
+      volumes:
+        - name: page
+          configMap:
+            name: frontend-page
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80

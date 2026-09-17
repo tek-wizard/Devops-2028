@@ -1,0 +1,12 @@
+# LoadBalancer asks the cloud provider for a real load balancer.
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-loadbalancer
+spec:
+  type: LoadBalancer
+  selector:
+    app: web-app
+  ports:
+    - port: 80
+      targetPort: 80

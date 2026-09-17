@@ -18,6 +18,10 @@ own README with the tasks, the commands I ran, the output, and screenshots.
 | Docker Multi-Stage Build Homework | [docker-multi-stage](docker-multi-stage) |
 | Docker Networking and Volume Homework Tasks | [docker-networking](docker-networking) |
 | Docker basics notes from the session | [docker-fundamentals](docker-fundamentals) |
+| Kubernetes Fundamentals | [kubernetes-fundamentals](kubernetes-fundamentals) |
+| Kubernetes Pods, ReplicaSets and Deployments | [kubernetes-pods-replicasets-deployments](kubernetes-pods-replicasets-deployments) |
+| Kubernetes Networking and Services | [kubernetes-networking-services](kubernetes-networking-services) |
+| Kubernetes Ingress, ConfigMaps and Secrets | [kubernetes-ingress-configmaps-secrets](kubernetes-ingress-configmaps-secrets) |
 
 ## Task list and where each one is
 
@@ -39,6 +43,19 @@ own README with the tasks, the commands I ran, the output, and screenshots.
 | Docker Networking | Task 2: Host Network | [link](docker-networking#task-2-host-network) |
 | Docker Networking | Task 3: Bind Mount | [link](docker-networking#task-3-bind-mount) |
 | Docker Networking | Task 4: Overlay Network | [link](docker-networking#task-4-overlay-network) |
+
+## Kubernetes
+
+For the Kubernetes homework I made a local cluster with **kind**, which runs each node as a
+Docker container. It has one control plane node and one worker node.
+
+```bash
+brew install kind
+kind create cluster --config kubernetes-fundamentals/kind-cluster.yaml
+```
+
+The cluster config is [kubernetes-fundamentals/kind-cluster.yaml](kubernetes-fundamentals/kind-cluster.yaml).
+Every Kubernetes folder has its YAML files in a `manifests` folder next to its README.
 
 ## The Docker applications
 

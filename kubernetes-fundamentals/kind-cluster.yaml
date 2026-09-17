@@ -1,0 +1,23 @@
+# A small cluster with one control plane node and one worker node.
+# kind runs each node as a Docker container.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: devops-2028
+nodes:
+  - role: control-plane
+    # this label lets the ingress controller run on this node,
+    # and the port mapping lets me reach the ingress from my laptop
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 8088
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 8443
+        protocol: TCP
+  - role: worker

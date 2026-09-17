@@ -1,0 +1,12 @@
+# ClusterIP is the default. It is only reachable from inside the cluster.
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-clusterip
+spec:
+  type: ClusterIP
+  selector:
+    app: web-app
+  ports:
+    - port: 80
+      targetPort: 80

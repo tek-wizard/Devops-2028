@@ -1,0 +1,9 @@
+# This one is broken on purpose, the image tag does not exist.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: broken-pod
+spec:
+  containers:
+    - name: nginx
+      image: nginx:this-tag-does-not-exist

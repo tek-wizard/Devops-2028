@@ -1,0 +1,9 @@
+# A ConfigMap holds plain (non secret) configuration as key value pairs.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  APP_NAME: "DevOps 2028 Homework"
+  APP_ENV: "development"
+  WELCOME_MESSAGE: "Hello from a ConfigMap"
