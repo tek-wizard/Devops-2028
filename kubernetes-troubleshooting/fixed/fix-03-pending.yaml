@@ -1,0 +1,13 @@
+# Fixed: ask for resources a node can actually give.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fixed-pending
+spec:
+  containers:
+    - name: app
+      image: nginx:alpine
+      resources:
+        requests:
+          cpu: 100m
+          memory: 64Mi

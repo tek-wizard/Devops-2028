@@ -1,0 +1,9 @@
+# Fixed: use a tag that exists.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fixed-image
+spec:
+  containers:
+    - name: app
+      image: nginx:alpine
