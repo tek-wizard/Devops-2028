@@ -1,0 +1,9 @@
+# Broken: the image tag does not exist.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: broken-image
+spec:
+  containers:
+    - name: app
+      image: nginx:does-not-exist-123

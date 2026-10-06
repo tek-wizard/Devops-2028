@@ -1,0 +1,45 @@
+# A PersistentVolume is the actual storage, created by hand here.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: manual-pv
+spec:
+  capacity:
+    storage: 100Mi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  # empty string means "do not use dynamic provisioning for this one"
+  storageClassName: ""
+  hostPath:
+    path: /tmp/manual-pv
+---
+# A PersistentVolumeClaim is the request for storage. It binds to the PV above.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: manual-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pvc-demo
+spec:
+  containers:
+    - name: app
+      image: busybox:1.37
+      command: ["sh", "-c", "echo 'this survives the pod' > /data/persisted.txt; sleep 3600"]
+      volumeMounts:
+        - name: storage
+          mountPath: /data
+  volumes:
+    - name: storage
+      persistentVolumeClaim:
+        claimName: manual-pvc

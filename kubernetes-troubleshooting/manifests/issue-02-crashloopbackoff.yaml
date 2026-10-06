@@ -1,0 +1,10 @@
+# Broken: the command exits straight away, so the container keeps restarting.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: broken-crash
+spec:
+  containers:
+    - name: app
+      image: busybox:1.37
+      command: ["sh", "-c", "echo 'starting up'; echo 'config file missing, exiting'; exit 1"]

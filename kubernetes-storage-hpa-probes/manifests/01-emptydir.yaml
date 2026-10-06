@@ -1,0 +1,22 @@
+# emptyDir lives as long as the Pod. Both containers share it.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: emptydir-demo
+spec:
+  containers:
+    - name: writer
+      image: busybox:1.37
+      command: ["sh", "-c", "echo 'written by the writer container' > /cache/note.txt; sleep 3600"]
+      volumeMounts:
+        - name: cache
+          mountPath: /cache
+    - name: reader
+      image: busybox:1.37
+      command: ["sh", "-c", "sleep 5; cat /cache/note.txt; sleep 3600"]
+      volumeMounts:
+        - name: cache
+          mountPath: /cache
+  volumes:
+    - name: cache
+      emptyDir: {}

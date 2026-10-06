@@ -1,0 +1,17 @@
+# Broken on purpose. The liveness probe asks for a page that does not exist,
+# so Kubernetes keeps restarting the container.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: failing-probe-demo
+spec:
+  containers:
+    - name: web
+      image: nginx:alpine
+      livenessProbe:
+        httpGet:
+          path: /this-page-does-not-exist
+          port: 80
+        initialDelaySeconds: 3
+        periodSeconds: 5
+        failureThreshold: 2

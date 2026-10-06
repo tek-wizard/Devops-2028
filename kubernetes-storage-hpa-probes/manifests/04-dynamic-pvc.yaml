@@ -1,0 +1,29 @@
+# No PersistentVolume written by hand. The StorageClass creates one automatically.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dynamic-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 200Mi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dynamic-demo
+spec:
+  containers:
+    - name: app
+      image: busybox:1.37
+      command: ["sh", "-c", "echo 'stored on a volume nobody created by hand' > /data/auto.txt; sleep 3600"]
+      volumeMounts:
+        - name: storage
+          mountPath: /data
+  volumes:
+    - name: storage
+      persistentVolumeClaim:
+        claimName: dynamic-pvc

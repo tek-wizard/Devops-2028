@@ -1,0 +1,32 @@
+# Broken: the Service selector does not match the Pod labels.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shop
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shop
+  template:
+    metadata:
+      labels:
+        app: shop
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shop-svc
+spec:
+  # the Pods are labelled app=shop, not app=shop-frontend
+  selector:
+    app: shop-frontend
+  ports:
+    - port: 80
+      targetPort: 80

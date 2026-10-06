@@ -1,0 +1,10 @@
+# Hits the service in a tight loop to push CPU up.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: load-generator
+spec:
+  containers:
+    - name: load
+      image: busybox:1.37
+      command: ["sh", "-c", "while true; do wget -q -O- http://php-apache; done"]

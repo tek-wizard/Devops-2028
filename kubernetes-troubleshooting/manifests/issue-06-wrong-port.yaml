@@ -1,0 +1,11 @@
+# Broken: the Service sends traffic to a port nothing is listening on.
+apiVersion: v1
+kind: Service
+metadata:
+  name: shop-wrongport
+spec:
+  selector:
+    app: shop
+  ports:
+    - port: 80
+      targetPort: 8080
