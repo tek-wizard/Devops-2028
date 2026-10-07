@@ -1,0 +1,10 @@
+title = "taskboard secret scanning"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Placeholder values used for the homework, not real credentials"
+regexes = [
+  '''placeholder-not-a-real-key''',
+]

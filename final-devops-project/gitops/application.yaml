@@ -1,0 +1,24 @@
+# Argo CD keeps the cluster matching the manifests in git.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: taskboard
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/tek-wizard/Devops-2028.git
+    targetRevision: main
+    path: final-devops-project/kubernetes
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: taskboard
+
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true

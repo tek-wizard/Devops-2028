@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: taskboard
+  namespace: taskboard
+  annotations:
+    # The app serves at /, but the ingress matches /taskboard. Without a rewrite
+    # the app receives /taskboard/... and returns 404. The capture group in the
+    # path puts everything after the prefix into $2, and that is what gets sent on.
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /taskboard(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: taskboard
+                port:
+                  number: 80

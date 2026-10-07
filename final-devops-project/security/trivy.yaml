@@ -1,0 +1,13 @@
+# Settings the pipeline uses when scanning the filesystem and the image.
+severity:
+  - HIGH
+  - CRITICAL
+
+vulnerability:
+  type:
+    - os
+    - library
+
+# Fail the build on anything HIGH or CRITICAL that has a fix available.
+exit-code: 1
+ignore-unfixed: true

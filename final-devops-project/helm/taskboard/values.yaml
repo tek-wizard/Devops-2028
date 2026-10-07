@@ -1,0 +1,43 @@
+replicaCount: 2
+
+image:
+  repository: taskboard
+  tag: "1.0"
+  pullPolicy: IfNotPresent
+
+config:
+  appName: Taskboard
+  appEnv: production
+  dataDir: /data
+
+# For the homework this is a plain value. A real deployment would point at an
+# existing Secret instead of putting the value in values.yaml.
+secret:
+  apiKey: placeholder-not-a-real-key
+
+persistence:
+  enabled: true
+  size: 100Mi
+  storageClass: standard
+
+service:
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  path: /taskboard
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 60
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi

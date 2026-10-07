@@ -1,0 +1,20 @@
+# Tells Prometheus to scrape the app's /metrics endpoint. The operator picks
+# this up automatically, no Prometheus config file is edited.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: taskboard
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - taskboard
+  selector:
+    matchLabels:
+      app: taskboard
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s

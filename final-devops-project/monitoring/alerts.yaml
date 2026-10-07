@@ -1,0 +1,45 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: taskboard-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: taskboard.rules
+      rules:
+        - alert: TaskboardDown
+          expr: absent(taskboard_tasks_total) == 1
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Taskboard is not reporting metrics"
+
+        - alert: TaskboardPodRestarting
+          expr: increase(kube_pod_container_status_restarts_total{namespace="taskboard"}[10m]) > 3
+          for: 2m
+          labels:
+            severity: warning
+            app: taskboard
+          annotations:
+            summary: "Taskboard pod {{ $labels.pod }} keeps restarting"
+
+        - alert: TaskboardNotReady
+          expr: kube_deployment_status_replicas_available{namespace="taskboard",deployment="taskboard"} < 1
+          for: 3m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Taskboard has no available replicas"
+
+        - alert: TaskboardHighCpu
+          expr: |
+            sum(rate(container_cpu_usage_seconds_total{namespace="taskboard",container="taskboard"}[5m]))
+            / sum(kube_pod_container_resource_limits{namespace="taskboard",resource="cpu"}) > 0.9
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Taskboard is near its CPU limit"
