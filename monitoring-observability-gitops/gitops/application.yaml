@@ -1,0 +1,27 @@
+# This is the Argo CD Application. It says: watch this folder in this git repo
+# and keep the cluster matching it.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gitops-demo
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/tek-wizard/Devops-2028.git
+    targetRevision: main
+    path: monitoring-observability-gitops/gitops/app
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gitops-demo
+
+  syncPolicy:
+    automated:
+      # put back anything changed by hand in the cluster
+      selfHeal: true
+      # delete things removed from git
+      prune: true
+    syncOptions:
+      - CreateNamespace=true
