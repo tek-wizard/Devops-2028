@@ -1,0 +1,15 @@
+# FAULT 1: the image tag does not exist
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tb-fault1
+  namespace: taskboard-broken
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: tb-fault1 } }
+  template:
+    metadata: { labels: { app: tb-fault1 } }
+    spec:
+      containers:
+        - name: taskboard
+          image: taskboard:9.9-does-not-exist

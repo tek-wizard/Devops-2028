@@ -1,0 +1,19 @@
+# FAULT 4: asks for more memory than any node has
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tb-fault4
+  namespace: taskboard-broken
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: tb-fault4 } }
+  template:
+    metadata: { labels: { app: tb-fault4 } }
+    spec:
+      containers:
+        - name: taskboard
+          image: taskboard:1.0
+          resources:
+            requests:
+              memory: "200Gi"
+              cpu: "40"

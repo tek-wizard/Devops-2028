@@ -1,0 +1,30 @@
+# FAULT 2: the Deployment asks for a ConfigMap key that is not there
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tb-config-broken
+  namespace: taskboard-broken
+data:
+  APP_NAME: "Taskboard"
+  # DATA_DIR is missing on purpose
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tb-fault2
+  namespace: taskboard-broken
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: tb-fault2 } }
+  template:
+    metadata: { labels: { app: tb-fault2 } }
+    spec:
+      containers:
+        - name: taskboard
+          image: taskboard:1.0
+          env:
+            - name: DATA_DIR
+              valueFrom:
+                configMapKeyRef:
+                  name: tb-config-broken
+                  key: DATA_DIR

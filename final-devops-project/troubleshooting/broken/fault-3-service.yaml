@@ -1,0 +1,31 @@
+# FAULT 3: the Service targetPort does not match the container port
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tb-fault3
+  namespace: taskboard-broken
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: tb-fault3 } }
+  template:
+    metadata: { labels: { app: tb-fault3 } }
+    spec:
+      securityContext: { runAsNonRoot: true, runAsUser: 1000, fsGroup: 1000 }
+      containers:
+        - name: taskboard
+          image: taskboard:1.0
+          ports: [{ containerPort: 3000 }]
+          env:
+            - name: DATA_DIR
+              value: /tmp/data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tb-fault3
+  namespace: taskboard-broken
+spec:
+  selector: { app: tb-fault3 }
+  ports:
+    - port: 80
+      targetPort: 8080   # the app listens on 3000
