@@ -1,0 +1,17 @@
+# Broken on purpose: points at a Service that does not exist.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: broken-wrong-svc
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /wrongsvc
+            pathType: Prefix
+            backend:
+              service:
+                name: service-that-does-not-exist
+                port:
+                  number: 80

@@ -3,88 +3,80 @@
 **Name:** Prateek Singh
 **Enrollment number:** 24BCS10135
 
-My homework for the DevOps class. There is one folder per homework, and each folder has its
-own README with the tasks, the commands I ran, the output, and screenshots.
+My homework for the DevOps course. One folder per session, each with its own README holding
+the tasks, the commands I ran, the real output and screenshots.
 
-## Homework
+## Sessions
 
-| Homework | Folder |
+| Session | Topic | Folder |
+|---|---|---|
+| 1 and 2 | Linux Fundamentals | [linux-fundamentals](linux-fundamentals) |
+| 3 | Shell Scripting | [shell-scripting](shell-scripting) |
+| 4 | Networking | [networking](networking) |
+| 5 | Git and GitHub | [git-and-github](git-and-github) |
+| 6 | Docker Fundamentals | [docker-fundamentals](docker-fundamentals) |
+| 7 | Docker Images | [docker-images](docker-images) |
+| 8 | Docker Networking | [docker-networking](docker-networking) |
+| 9 | Kubernetes Fundamentals | [kubernetes-fundamentals](kubernetes-fundamentals) |
+| 10 | Kubernetes Pods, ReplicaSets and Deployments | [kubernetes-pods-replicasets-deployments](kubernetes-pods-replicasets-deployments) |
+| 11 | Kubernetes Networking and Services | [kubernetes-networking-services](kubernetes-networking-services) |
+| 12 | Kubernetes Ingress, ConfigMaps and Secrets | [kubernetes-ingress-configmaps-secrets](kubernetes-ingress-configmaps-secrets) |
+| 13 | Kubernetes Storage, HPA and Probes | [kubernetes-storage-hpa-probes](kubernetes-storage-hpa-probes) |
+| 14 | Kubernetes Troubleshooting | [kubernetes-troubleshooting](kubernetes-troubleshooting) |
+| 15 | Helm | [kubernetes-helm](kubernetes-helm) |
+| 16 | CI/CD and GitHub Actions | [cicd-github-actions](cicd-github-actions) |
+| 17 | Complete CI/CD and DevSecOps | [cicd-devsecops](cicd-devsecops) |
+| 18 | Terraform and Infrastructure as Code | [terraform-iac](terraform-iac) |
+| 19 | Cloud and Terraform in Action | [terraform-cloud-project](terraform-cloud-project) |
+| 20 | Monitoring, Observability and GitOps | [monitoring-observability-gitops](monitoring-observability-gitops) |
+| 21 | Final DevOps Project and Troubleshooting | [final-devops-project](final-devops-project) |
+
+Also in the repo: [docker-multi-stage](docker-multi-stage), the multi-stage build homework.
+
+## How I ran everything
+
+My laptop is a MacBook, so a few things needed a local environment rather than real servers:
+
+| What | How |
 |---|---|
-| Linux Homework Tasks | [linux-fundamentals](linux-fundamentals) |
-| Shell Scripting Homework Task | [shell-scripting](shell-scripting) |
-| Networking Homework Tasks | [networking](networking) |
-| Git Homework Tasks | [git-and-github](git-and-github) |
-| Docker Homework Tasks | [docker-images](docker-images) |
-| Docker Multi-Stage Build Homework | [docker-multi-stage](docker-multi-stage) |
-| Docker Networking and Volume Homework Tasks | [docker-networking](docker-networking) |
-| Docker basics notes from the session | [docker-fundamentals](docker-fundamentals) |
-| Kubernetes Fundamentals | [kubernetes-fundamentals](kubernetes-fundamentals) |
-| Kubernetes Pods, ReplicaSets and Deployments | [kubernetes-pods-replicasets-deployments](kubernetes-pods-replicasets-deployments) |
-| Kubernetes Networking and Services | [kubernetes-networking-services](kubernetes-networking-services) |
-| Kubernetes Ingress, ConfigMaps and Secrets | [kubernetes-ingress-configmaps-secrets](kubernetes-ingress-configmaps-secrets) |
+| Linux commands | Ubuntu containers, so the output matches a real Linux machine |
+| Kubernetes | A 2 node **kind** cluster, config in [kubernetes-fundamentals](kubernetes-fundamentals/kind-cluster.yaml) |
+| AWS and Terraform | **LocalStack**, so nothing is created in a real AWS account and nothing is billed |
+| CI/CD | Real GitHub Actions runs on this repository |
+| Monitoring | Prometheus, Grafana and Alertmanager on the kind cluster |
+| GitOps | Argo CD on the kind cluster, syncing from this repository |
 
-## Task list and where each one is
+Where something behaves differently from a real setup, I have said so in that session's README
+rather than leaving it out.
 
-| Homework | Task | Where |
+## Things that actually happened
+
+A few results worth pointing at, because they were not staged:
+
+- **The security gate blocked a release.** In [session 17](cicd-devsecops) Trivy failed the
+  build on three HIGH CVEs and the push steps never ran. The fix was to remove the vulnerable
+  software from the image, not to lower the threshold.
+- **The HPA scaled 1 to 10 pods** under a real load generator in
+  [session 13](kubernetes-storage-hpa-probes), then held at the CPU target.
+- **Recreate really does cause downtime.** In [session 10](kubernetes-pods-replicasets-deployments)
+  sampling every half second caught `running=0`, where rolling update never dropped below 4.
+- **Argo CD built a whole application from git alone** in
+  [session 20](monitoring-observability-gitops), with nothing applied by hand.
+
+## Applications built
+
+| App | Where | Port |
 |---|---|---|
-| Linux | Task 1: Soft Link and Hard Link | [link](linux-fundamentals#task-1-soft-link-and-hard-link) |
-| Linux | Task 2: `adduser` vs `useradd` | [link](linux-fundamentals#task-2-adduser-vs-useradd) |
-| Linux | Task 3: `journalctl` | [link](linux-fundamentals#task-3-journalctl) |
-| Linux | Task 4: Linux Command Cheat Sheet | [link](linux-fundamentals#task-4-linux-command-cheat-sheet) |
-| Shell Scripting | System Information Script | [link](shell-scripting#10-system_infosh-the-homework) |
-| Networking | Task 1 and Task 2: commands with output and explanation | [link](networking) |
-| Git | Task 1: `git commit -a -m` | [link](git-and-github#task-1-git-commit--a--m) |
-| Git | Task 2: Git Cherry-Pick | [link](git-and-github#task-2-git-cherry-pick) |
-| Docker | Six Hello World applications | [link](docker-images) |
-| Docker Multi-Stage | Task 1: run the multi-stage Dockerfile | [link](docker-multi-stage#task-1-run-the-multi-stage-dockerfile) |
-| Docker Multi-Stage | Task 2: documentation | [link](docker-multi-stage#task-2-documentation) |
-| Docker Multi-Stage | Task 3: deploy 3 types of applications | [link](docker-multi-stage#task-3-three-different-types-of-applications) |
-| Docker Networking | Task 1: Docker Container Networking | [link](docker-networking#task-1-docker-container-networking) |
-| Docker Networking | Task 2: Host Network | [link](docker-networking#task-2-host-network) |
-| Docker Networking | Task 3: Bind Mount | [link](docker-networking#task-3-bind-mount) |
-| Docker Networking | Task 4: Overlay Network | [link](docker-networking#task-4-overlay-network) |
+| Node.js, Python, Java, Apache, React, Nginx | [docker-images](docker-images) | 8081 to 8087 |
+| Multi-stage build from class | [docker-multi-stage](docker-multi-stage) | 8080 |
+| CI/CD demo | [cicd-github-actions](cicd-github-actions) | built by the pipeline |
+| DevSecOps demo | [cicd-devsecops](cicd-devsecops) | deployed to the cluster |
+| Taskboard, the final project | [final-devops-project](final-devops-project) | through the ingress |
 
-## Kubernetes
+## Environment
 
-For the Kubernetes homework I made a local cluster with **kind**, which runs each node as a
-Docker container. It has one control plane node and one worker node.
-
-```bash
-brew install kind
-kind create cluster --config kubernetes-fundamentals/kind-cluster.yaml
 ```
-
-The cluster config is [kubernetes-fundamentals/kind-cluster.yaml](kubernetes-fundamentals/kind-cluster.yaml).
-Every Kubernetes folder has its YAML files in a `manifests` folder next to its README.
-
-## The Docker applications
-
-Six applications, each in its own folder with its own Dockerfile, all built and run.
-
-| Folder | Application | Host port |
-|---|---|---|
-| [docker-images/nodejs-app](docker-images/nodejs-app) | Node.js with Express | 8081 |
-| [docker-images/python-app](docker-images/python-app) | Python with Flask | 8082 |
-| [docker-images/java-app](docker-images/java-app) | Java web server | 8083 |
-| [docker-images/Apache-app](docker-images/Apache-app) | Apache httpd | 8084 |
-| [docker-images/React-app](docker-images/React-app) | React built with Vite, served by nginx | 8086 |
-| [docker-images/nginx-app](docker-images/nginx-app) | Nginx | 8087 |
-| [docker-multi-stage/multi-stage-app](docker-multi-stage) | The class multi-stage Dockerfile | 8080 |
-
-## How I ran things
-
-I have a MacBook, so for the Linux commands I used an Ubuntu container to get the same
-output as a normal Linux machine:
-
-```bash
-docker run -dit --name devops-lab --hostname devops-lab -v "$PWD":/home/work ubuntu:24.04 bash
-docker exec -it devops-lab bash
+macOS on Apple Silicon (arm64)
+Docker 29.5.3, kind v0.33.0, kubectl v1.34.1
+Helm v4.3.0, Terraform v1.16.4
 ```
-
-That is why the hostname in the Linux output is `devops-lab` and the user is `root`.
-
-For `journalctl` I needed a second container running systemd, because a normal container does
-not have systemd inside it. The Dockerfile for it is in
-[linux-fundamentals](linux-fundamentals/Dockerfile.systemd).
-
-All the Docker work was done directly on my laptop with Docker Desktop.

@@ -1,0 +1,62 @@
+# Blue-green: two full deployments side by side. The Service decides which one
+# is live by which label it selects.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-blue
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myapp
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: myapp
+        version: blue
+    spec:
+      containers:
+        - name: web
+          image: nginx:alpine
+          ports: [{ containerPort: 80 }]
+          command: ["/bin/sh","-c"]
+          args:
+            - echo "<h1>BLUE version</h1>" > /usr/share/nginx/html/index.html && nginx -g 'daemon off;'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-green
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myapp
+      version: green
+  template:
+    metadata:
+      labels:
+        app: myapp
+        version: green
+    spec:
+      containers:
+        - name: web
+          image: nginx:alpine
+          ports: [{ containerPort: 80 }]
+          command: ["/bin/sh","-c"]
+          args:
+            - echo "<h1>GREEN version</h1>" > /usr/share/nginx/html/index.html && nginx -g 'daemon off;'
+---
+# The switch. Changing version: blue to version: green moves all traffic at once.
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-live
+spec:
+  selector:
+    app: myapp
+    version: blue
+  ports:
+    - port: 80
+      targetPort: 80

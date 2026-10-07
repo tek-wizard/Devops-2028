@@ -1,0 +1,61 @@
+# Canary: one Service selects both deployments, so traffic splits by pod count.
+# 4 stable pods + 1 canary pod means roughly 20% goes to the canary.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: canary-stable
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: canary-app
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: canary-app
+        track: stable
+    spec:
+      containers:
+        - name: web
+          image: nginx:alpine
+          ports: [{ containerPort: 80 }]
+          command: ["/bin/sh","-c"]
+          args:
+            - echo "STABLE" > /usr/share/nginx/html/index.html && nginx -g 'daemon off;'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: canary-new
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: canary-app
+      track: canary
+  template:
+    metadata:
+      labels:
+        app: canary-app
+        track: canary
+    spec:
+      containers:
+        - name: web
+          image: nginx:alpine
+          ports: [{ containerPort: 80 }]
+          command: ["/bin/sh","-c"]
+          args:
+            - echo "CANARY" > /usr/share/nginx/html/index.html && nginx -g 'daemon off;'
+---
+# Selects app: canary-app only, so it matches BOTH tracks.
+apiVersion: v1
+kind: Service
+metadata:
+  name: canary-svc
+spec:
+  selector:
+    app: canary-app
+  ports:
+    - port: 80
+      targetPort: 80

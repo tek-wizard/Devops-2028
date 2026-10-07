@@ -1,0 +1,17 @@
+# postStart runs just after the container starts, preStop just before it stops.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: life-hooks
+spec:
+  containers:
+    - name: web
+      image: nginx:alpine
+      lifecycle:
+        postStart:
+          exec:
+            command: ["sh", "-c", "echo started at $(date) > /tmp/poststart.txt"]
+        preStop:
+          exec:
+            command: ["sh", "-c", "sleep 2; echo stopping"]
+      ports: [{ containerPort: 80 }]

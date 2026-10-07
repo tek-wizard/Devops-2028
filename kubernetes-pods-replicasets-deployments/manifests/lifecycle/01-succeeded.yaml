@@ -1,0 +1,11 @@
+# Runs, finishes, and ends in phase Succeeded.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: life-succeeded
+spec:
+  restartPolicy: Never
+  containers:
+    - name: job
+      image: busybox:1.37
+      command: ["sh", "-c", "echo doing some work; sleep 5; echo done"]

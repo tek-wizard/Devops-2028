@@ -5,6 +5,19 @@
 
 ## Homework tasks
 
+**Task 1: Kubernetes Services**: deploy and demonstrate all 5 Service types.
+
+**Task 2: Object comparison**: Deployment vs ReplicaSet, Deployment vs DaemonSet vs
+StatefulSet, and ReplicaSet vs Service.
+
+**Task 3: FQDN**: what it is, the DNS naming convention, namespace based DNS, pod to Service
+communication.
+
+**Task 4: CoreDNS**: what it is, why Kubernetes uses it, how service discovery works, how
+queries resolve, its configuration, and how to troubleshoot DNS.
+
+The detail of task 1:
+
 - Understand why Services are needed.
 - Practise the Service types: ClusterIP, NodePort, LoadBalancer, ExternalName and headless.
 - Check how Pods reach each other by name.
@@ -317,3 +330,289 @@ kubectl delete pod client
 - `<pending>` on a LoadBalancer on a local cluster is the expected result, not a bug.
 - When a Service does not work, `kubectl get endpoints` is the fastest check. Empty endpoints
   means the selector and the Pod labels do not match.
+
+---
+
+# Task 2: Comparing the objects
+
+## Deployment vs ReplicaSet
+
+| | ReplicaSet | Deployment |
+|---|---|---|
+| Purpose | Keep N identical pods running | Manage ReplicaSets so versions can change |
+| Pod management | Creates and deletes pods to hit the count | Does it through a ReplicaSet |
+| Scaling | Yes | Yes, passes it down |
+| Rolling updates | **No** | Yes |
+| Rollback | No | `kubectl rollout undo` |
+| Used directly | Rarely | Almost always |
+
+**The relationship:** a Deployment creates a ReplicaSet, and the ReplicaSet creates the pods.
+
+```
+Deployment  ->  ReplicaSet  ->  Pods
+```
+
+I saw this in [session 10](../kubernetes-pods-replicasets-deployments): creating only a
+Deployment produced a ReplicaSet I never asked for, and the pod names showed the chain,
+`web-deploy-b68785c99-7xscv` being deployment, then replicaset hash, then pod.
+
+Changing the image created a **second** ReplicaSet and scaled the first to 0 rather than
+deleting it. That retained old ReplicaSet is exactly what a rollback scales back up. A bare
+ReplicaSet cannot do that, which is the whole reason Deployments exist.
+
+## Deployment vs DaemonSet vs StatefulSet
+
+| | Deployment | DaemonSet | StatefulSet |
+|---|---|---|---|
+| Use case | Stateless apps | One agent per node | Databases, anything with identity |
+| Pod creation | N identical pods, anywhere | **One per node**, automatically | Ordered, one at a time |
+| Pod names | Random suffix | Random suffix | **Stable**: `db-0`, `db-1` |
+| Scaling | Set a replica count | Follows the node count | Ordered up and down |
+| Networking | One Service load balances | Usually node local | Headless Service, one DNS name per pod |
+| Storage | Usually shared or none | Usually hostPath | **One PVC per pod**, kept on restart |
+| Example | Web app, API | Log collector, node-exporter | PostgreSQL, Kafka |
+
+The DaemonSet point is the one I proved: it said `DESIRED 2` without me writing any replica
+count, because my cluster has 2 nodes. Add a node, get a pod.
+
+The StatefulSet difference is identity. A Deployment's pods are interchangeable, so replacing
+one is fine. A database replica is not interchangeable: it has its own data and other members
+need to find that specific one. StatefulSet gives stable names and keeps each pod's PVC
+attached to it across restarts.
+
+The node-exporter pods in [session 20](../monitoring-observability-gitops) are a real DaemonSet,
+one per node, for exactly that reason.
+
+## ReplicaSet vs Service
+
+These two are not alternatives, they solve different halves of the same problem.
+
+| | ReplicaSet | Service |
+|---|---|---|
+| Responsibility | **How many** pods exist | **How to reach** them |
+| Keeps count correct | Yes | No |
+| Gives a stable address | No | Yes |
+| Load balances | No | Yes |
+| Knows about pods via | Its own label selector | A label selector |
+
+**Why a Service is needed at all:** a ReplicaSet keeps 3 pods running, but if one dies the
+replacement has a **different IP**. Anything that had stored the old IP is now talking to
+nothing. That is the problem from the top of this file.
+
+**How traffic reaches the pods:**
+
+```
+client
+  |  asks DNS for "web-clusterip"
+  v
+CoreDNS answers with the Service ClusterIP  (10.96.50.237)
+  |
+  v
+kube-proxy rules on the node rewrite the destination
+  |
+  v
+one of the pod IPs from the endpoint list  (10.244.1.21 or .22)
+```
+
+The endpoint list is what links them: the Service watches for pods matching its selector, and
+the same labels the ReplicaSet uses to count pods are what the Service uses to find them. Both
+work off labels, which is why a selector typo breaks one or the other.
+
+---
+
+# Task 3: FQDN
+
+## What an FQDN is
+
+A fully qualified domain name is the complete name with nothing left to guess. In Kubernetes
+every Service gets one.
+
+```
+<service>.<namespace>.svc.cluster.local
+```
+
+| Part | Meaning |
+|---|---|
+| `service` | The Service name |
+| `namespace` | Which namespace it lives in |
+| `svc` | It is a Service, as opposed to a pod |
+| `cluster.local` | The cluster domain |
+
+## It working
+
+```text
+$ kubectl exec bgtest -- nslookup other-app.dns-demo.svc.cluster.local
+Name:	other-app.dns-demo.svc.cluster.local
+Address: 10.96.61.126
+```
+
+That Service is in the `dns-demo` namespace and I queried from a pod in `default`.
+
+## Namespace based DNS
+
+The short name does **not** work across namespaces:
+
+```text
+$ kubectl exec bgtest -- nslookup other-app
+** server can't find other-app.svc.cluster.local: NXDOMAIN
+command terminated with exit code 1
+```
+
+The reason is in the pod's resolver configuration:
+
+```text
+$ kubectl exec bgtest -- cat /etc/resolv.conf
+search default.svc.cluster.local svc.cluster.local cluster.local
+nameserver 10.96.0.10
+options ndots:5
+```
+
+The `search` line is what makes short names work. Asking for `other-app` makes the resolver try
+`other-app.default.svc.cluster.local` first, because my pod is in `default`. That does not
+exist, since the Service is in `dns-demo`.
+
+So the rule is:
+
+| From where | What to use |
+|---|---|
+| Same namespace | `other-app` |
+| Different namespace | `other-app.dns-demo` |
+| Anywhere, unambiguous | `other-app.dns-demo.svc.cluster.local` |
+
+`ndots:5` is worth knowing because it bites in production. Any name with fewer than 5 dots gets
+tried against every search domain first, so looking up `api.github.com` (2 dots) makes three
+failed cluster lookups before the real one. On a busy service that is a lot of wasted DNS
+traffic, and the fix is a trailing dot, `api.github.com.`, or a custom `dnsConfig`.
+
+## Pod to Service communication
+
+This is what [session 11's](README.md) ClusterIP test did: `wget http://web-clusterip` worked
+with no IP anywhere, because DNS resolved the name to the Service IP and kube-proxy forwarded
+it to a pod.
+
+Pods have DNS names too, with dashes instead of dots in the IP:
+`10-244-1-21.default.pod.cluster.local`. Rarely used directly, except with StatefulSets where
+the headless Service gives each pod a stable name like `db-0.db.default.svc.cluster.local`.
+
+---
+
+# Task 4: CoreDNS
+
+## What it is
+
+CoreDNS is the DNS server inside the cluster. It is what answers every name lookup a pod makes,
+and it is just pods like anything else:
+
+```text
+$ kubectl get pods -n kube-system -l k8s-app=kube-dns
+  coredns-559f6c778d-5jv98  Running
+  coredns-559f6c778d-xbtbq  Running
+
+$ kubectl get svc -n kube-system kube-dns
+  kube-dns  10.96.0.10  53/UDP,53/TCP,9153/TCP
+```
+
+`10.96.0.10` is the same address that appeared as `nameserver` in the pod's `/etc/resolv.conf`.
+That is the whole link: the kubelet writes that address into every pod it starts.
+
+Two replicas because DNS failing takes the whole cluster down with it.
+
+## Why Kubernetes uses it
+
+Pod IPs change constantly, so something has to translate stable names into current addresses.
+CoreDNS replaced the older kube-dns because it is one Go binary with a plugin chain instead of
+three containers, it is easier to extend, and it is a CNCF project used outside Kubernetes too.
+
+## How service discovery works
+
+1. A Service is created.
+2. The API server records it, and an endpoint list is kept up to date with the matching pod IPs.
+3. CoreDNS watches the API server for Services and Endpoints.
+4. A pod looks up the Service name.
+5. CoreDNS answers with the ClusterIP.
+6. kube-proxy's rules on the node forward that to one of the pod IPs.
+
+Nobody edits a DNS zone file. CoreDNS builds its answers from the API server directly.
+
+For a **headless** Service there is no ClusterIP, so step 5 returns the pod IPs instead, which
+is what the two addresses in the headless test earlier were.
+
+## The configuration
+
+CoreDNS is configured by a Corefile in a ConfigMap:
+
+```text
+$ kubectl get configmap coredns -n kube-system -o jsonpath='{.data.Corefile}'
+.:53 {
+    errors
+    health {
+       lameduck 5s
+    }
+    ready
+    kubernetes cluster.local in-addr.arpa ip6.arpa {
+       pods insecure
+       fallthrough in-addr.arpa ip6.arpa
+       ttl 30
+    }
+    prometheus :9153
+    forward . /etc/resolv.conf {
+       max_concurrent 1000
+    }
+    cache 30 {
+       disable success cluster.local
+       disable denial cluster.local
+    }
+```
+
+Reading the plugins:
+
+| Plugin | What it does |
+|---|---|
+| `errors` | Log errors |
+| `health` / `ready` | Endpoints for the probes |
+| `kubernetes cluster.local` | Answer for the cluster domain from the API server |
+| `forward . /etc/resolv.conf` | **Anything else goes to the node's upstream DNS** |
+| `cache 30` | Cache answers for 30 seconds |
+| `prometheus :9153` | Expose metrics, which is why port 9153 is on the Service |
+
+The `forward` line is how a pod reaches `github.com`. Cluster names are answered locally and
+everything else is passed upstream.
+
+## Troubleshooting DNS
+
+```bash
+# does the name resolve at all
+kubectl exec <pod> -- nslookup my-service.my-namespace.svc.cluster.local
+
+# is the resolver configured correctly
+kubectl exec <pod> -- cat /etc/resolv.conf     # nameserver should be the kube-dns ClusterIP
+
+# are the CoreDNS pods healthy
+kubectl get pods -n kube-system -l k8s-app=kube-dns
+kubectl logs -n kube-system -l k8s-app=kube-dns --tail=30
+
+# does the Service even have backends
+kubectl get endpoints my-service
+```
+
+A check I use to prove DNS itself is fine before blaming it:
+
+```text
+$ kubectl exec bgtest -- nslookup kubernetes.default.svc.cluster.local
+Name:	kubernetes.default.svc.cluster.local
+Address: 10.96.0.1
+```
+
+That Service always exists, so if it resolves then CoreDNS is working and the problem is the
+specific Service, not DNS.
+
+Telling the failures apart, which is the same distinction as the ping failures in
+[the networking homework](../networking):
+
+| Symptom | Likely cause |
+|---|---|
+| `NXDOMAIN` for a short name | Wrong namespace, use the FQDN |
+| `NXDOMAIN` for the FQDN | The Service does not exist |
+| Resolves, but connection refused | Wrong `targetPort`, or nothing listening |
+| Resolves, but times out | Endpoints empty, or a network policy blocking it |
+| Everything fails, including `kubernetes.default` | CoreDNS itself is down |

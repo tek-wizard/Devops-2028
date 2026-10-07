@@ -5,6 +5,14 @@
 
 ## Homework tasks
 
+**Task 1: Deployment Strategies**: implement all four: rolling update, blue-green, canary and
+recreate.
+
+**Task 2: Pod Lifecycle**: apply the YAML, check the status and details, capture the output
+and explain what happened.
+
+The original tasks, which are also covered below:
+
 - Create a Pod and understand it.
 - Create a ReplicaSet and see self healing and scaling.
 - Create a Deployment, do a rolling update, check the history and roll back.
@@ -371,3 +379,230 @@ kubectl delete -f manifests/
 - `kubectl get` tells me something is wrong and `kubectl describe` tells me why. For a
   crashing container it is `kubectl logs` instead, because the container at least started.
 - A DaemonSet counts nodes instead of replicas.
+
+---
+
+# Task 1: Deployment strategies
+
+All four are in [manifests/strategies](manifests/strategies). The difference between them is
+how old pods are replaced by new ones, and what that costs in downtime and risk.
+
+## 1. Rolling update
+
+Replace pods a few at a time, so the app stays up.
+
+```yaml
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1          # at most 1 extra pod above the desired count
+      maxUnavailable: 1    # at most 1 pod missing at a time
+```
+
+```text
+$ kubectl set image deployment/rolling-app nginx=nginx:1.28-alpine
+$ # sampling the running pod count during the rollout
+  t+3s   running=4  total=4
+  t+6s   running=4  total=4
+  t+9s   running=4  total=4
+  t+12s  running=4  total=4
+deployment "rolling-app" successfully rolled out
+```
+
+**Running never dropped below 4.** The app was available for the whole rollout, which is the
+point of this strategy and why it is the default.
+
+`maxSurge` and `maxUnavailable` are the two dials. `maxUnavailable: 0` means never drop below
+the desired count, at the cost of needing spare capacity for the extra pods.
+
+## 2. Recreate
+
+Terminate everything first, then start the new version.
+
+```yaml
+  strategy:
+    type: Recreate
+```
+
+Sampling every half second this time, because the gap is short and 3 second polling missed it
+completely on my first attempt:
+
+```text
+$ kubectl set image deployment/recreate-app nginx=nginx:1.27-alpine
+   0.5s  running=2 total=3
+   1.0s  running=0 total=3     <- no pods serving at all
+   1.5s  running=0 total=6
+   2.0s  running=3 total=3
+```
+
+**`running=0`.** There really is a window with nothing serving. On a cluster with slower image
+pulls that window is seconds or minutes rather than one second.
+
+So why use it: when two versions genuinely cannot run at once. A database migration that
+changes the schema, or an app that takes an exclusive lock on a file or volume. The downtime is
+accepted because the alternative is corruption.
+
+## 3. Blue-green
+
+Two complete deployments side by side, and a Service that decides which one is live.
+
+```text
+$ kubectl get pods -l app=myapp -L version
+  app-blue-855fbcc675-92xzk     Running   blue
+  app-blue-855fbcc675-bbqnc     Running   blue
+  app-green-64f6f8c94c-5mbv4    Running   green
+  app-green-64f6f8c94c-nlw5m    Running   green
+```
+
+Both versions running at the same time. The Service selector is the switch:
+
+```text
+$ kubectl get svc app-live -o jsonpath='{.spec.selector}'
+{"app":"myapp","version":"blue"}
+  traffic goes to: <h1>BLUE version</h1>
+
+$ kubectl patch service app-live -p '{"spec":{"selector":{"app":"myapp","version":"green"}}}'
+service/app-live patched
+
+$ kubectl get svc app-live -o jsonpath='{.spec.selector}'
+{"app":"myapp","version":"green"}
+  traffic now goes to: <h1>GREEN version</h1>
+```
+
+One label change moved **all** traffic instantly. And rolling back is the same command in
+reverse:
+
+```text
+$ kubectl patch service app-live -p '{"spec":{"selector":{"app":"myapp","version":"blue"}}}'
+  back to: <h1>BLUE version</h1>
+```
+
+That is the real benefit. A rollback is a label change, not a redeploy, so it takes a second
+instead of minutes. The cost is running two full copies, so double the resources during a
+release.
+
+## 4. Canary
+
+Send a small share of traffic to the new version first.
+
+The trick is one Service selecting **both** deployments:
+
+```yaml
+spec:
+  selector:
+    app: canary-app     # matches both stable and canary pods
+```
+
+```text
+$ kubectl get pods -l app=canary-app -L track
+  canary-new-5bf7884f9d-xfqtw      canary
+  canary-stable-57748849dd-fdcl8   stable
+  canary-stable-57748849dd-r5rws   stable
+  canary-stable-57748849dd-snxfh   stable
+  canary-stable-57748849dd-zg66m   stable
+```
+
+4 stable and 1 canary. Sending 30 requests through the Service:
+
+```text
+  CANARY   6 responses
+  STABLE   24 responses
+```
+
+**6 out of 30 is 20%**, which is exactly the 1 in 5 pod ratio. That is the mechanism: with a
+plain Service, the traffic split is just the pod count ratio. Shifting more traffic to the
+canary means scaling the canary deployment up and the stable one down.
+
+The limitation is that the split is coarse. 1 pod in 5 is 20%, and getting 1% means 99 stable
+pods. Real canary setups use a service mesh or an ingress controller that can split by
+percentage directly, and route on headers so a specific group of users gets the new version.
+
+## Comparing them
+
+| | Downtime | Resource cost | Rollback speed | Risk |
+|---|---|---|---|---|
+| Rolling update | None | Slightly over 100% | Minutes, reverse rollout | Both versions live at once |
+| Recreate | **Yes** | 100% | Minutes | Only one version ever live |
+| Blue-green | None | **200%** | **Seconds**, one label change | Full cutover, all users at once |
+| Canary | None | ~110% | Seconds, scale canary to 0 | **Lowest**, only some users affected |
+
+Rolling update is the sensible default. Recreate is for when two versions cannot coexist.
+Blue-green buys the fastest rollback. Canary limits the blast radius.
+
+---
+
+# Task 2: Pod lifecycle
+
+Manifests in [manifests/lifecycle](manifests/lifecycle).
+
+## The phases
+
+| Phase | Meaning |
+|---|---|
+| `Pending` | Accepted, but not running yet. Waiting to be scheduled or for the image |
+| `Running` | Bound to a node and at least one container is running |
+| `Succeeded` | Every container exited **0** and will not restart |
+| `Failed` | At least one container exited non zero |
+| `Unknown` | The node cannot be reached |
+
+## Watching it happen
+
+```text
+$ kubectl apply -f manifests/lifecycle/
+  t+4s   life-succeeded=Running    life-failed=Failed  life-hooks=Running
+  t+8s   life-succeeded=Succeeded  life-failed=Failed  life-hooks=Running
+  t+12s  life-succeeded=Succeeded  life-failed=Failed  life-hooks=Running
+```
+
+`life-succeeded` sleeps 5 seconds then exits, so it was caught in `Running` at 4 seconds and
+had moved to `Succeeded` by 8. `life-failed` exits immediately, so it was already `Failed`.
+`life-hooks` runs nginx, which never exits, so it stays `Running` forever.
+
+```text
+$ kubectl get pods -o custom-columns='NAME:...,PHASE:...,REASON:...,EXIT:...'
+NAME             PHASE       REASON      EXIT
+life-succeeded   Succeeded   Completed   0
+life-failed      Failed      Error       3
+life-hooks       Running     <none>      <none>
+```
+
+The exit code is the detail that matters. `0` becomes `Succeeded` with reason `Completed`, and
+`3` becomes `Failed` with reason `Error`. That is the whole rule: Kubernetes decides success
+purely from the exit code.
+
+## restartPolicy changes the outcome
+
+Both pods above have `restartPolicy: Never`. With the default `Always`, `life-failed` would not
+have been `Failed` at all. It would have been restarted over and over and ended up in
+`CrashLoopBackOff`, which is exactly the broken pod from
+[session 14](../kubernetes-troubleshooting).
+
+| restartPolicy | Used for |
+|---|---|
+| `Always` | The default. Long running servers |
+| `OnFailure` | Jobs that should retry if they fail |
+| `Never` | Jobs that should be looked at by a human if they fail |
+
+So `Failed` and `CrashLoopBackOff` are the same situation under different restart policies.
+
+## Lifecycle hooks
+
+```yaml
+      lifecycle:
+        postStart:
+          exec:
+            command: ["sh", "-c", "echo started at $(date) > /tmp/poststart.txt"]
+        preStop:
+          exec:
+            command: ["sh", "-c", "sleep 2; echo stopping"]
+```
+
+```text
+$ kubectl exec life-hooks -- cat /tmp/poststart.txt
+started at Wed Oct 7 10:59:08 UTC 2026
+```
+
+`postStart` ran. The useful one in practice is `preStop`: Kubernetes removes the pod from the
+Service endpoints and sends SIGTERM at roughly the same moment, so a short `preStop` sleep
+gives in flight requests time to finish before the process goes away. Without it a rolling
+update drops a few requests even though it looks clean.

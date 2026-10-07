@@ -5,6 +5,14 @@
 
 ## Homework tasks
 
+**Task 1: ConfigMap**  **Task 2: Secret**  **Task 3: Ingress**
+
+**Task 4: Ingress vs Ingress Controller**: understand the difference between the two.
+
+**Task 5: Troubleshooting**: break the ingress setup and work through it.
+
+The detail:
+
 - Install an Ingress controller.
 - Create a ConfigMap and use it in an application.
 - Create a Secret and use it in an application.
@@ -335,3 +343,140 @@ kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/con
 - An Ingress is only rules. Nothing happens until a controller is installed to act on them.
 - One Ingress can serve many apps on one port by routing on the path, which is why it is used
   instead of opening a NodePort per app.
+
+---
+
+# Task 4: Ingress vs Ingress Controller
+
+This is the distinction that confused me at first, because both are called "ingress".
+
+| | Ingress | Ingress Controller |
+|---|---|---|
+| What it is | A Kubernetes object, a set of routing rules | A program that actually runs and routes traffic |
+| Created by | Me, as YAML | Installed once per cluster |
+| How many | One per app, as many as needed | Usually one for the whole cluster |
+| On its own | **Does nothing** | Does nothing useful without rules to read |
+| Analogy | The instructions | The person following them |
+
+An Ingress object is **only data**. Writing one and applying it changes nothing by itself.
+Something has to watch for Ingress objects and reconfigure a real proxy. That is the controller.
+
+```text
+$ kubectl get deploy -n ingress-nginx
+  ingress-nginx-controller  1/1
+```
+
+That is a real nginx deployment. When I apply an Ingress, the controller notices, rewrites its
+nginx configuration, and reloads. The rules I wrote become nginx server blocks.
+
+## IngressClass is what links them
+
+```text
+$ kubectl get ingressclass
+NAME    CONTROLLER             PARAMETERS   AGE
+nginx   k8s.io/ingress-nginx   <none>       16h
+```
+
+An Ingress names a class, and the controller only acts on Ingress objects naming its class.
+That is how more than one controller can coexist, for example nginx for internal traffic and an
+AWS load balancer controller for public traffic.
+
+Other controllers: Traefik, HAProxy, Kong, and the cloud ones like AWS ALB and GKE Ingress. The
+Ingress object is standard Kubernetes, the controller is a choice, and annotations are mostly
+controller specific. That is why
+`nginx.ingress.kubernetes.io/rewrite-target` would mean nothing to Traefik.
+
+---
+
+# Task 5: Troubleshooting the ingress
+
+I broke it two ways. Both return the same 503, with completely different causes. Manifests in
+[manifests/broken](manifests/broken).
+
+## Fault A: no ingressClassName
+
+```yaml
+spec:
+  # no ingressClassName
+  rules:
+    - http:
+        paths:
+          - path: /noclass
+```
+
+**Symptom**
+
+```text
+$ kubectl get ingress broken-no-class
+NAME              CLASS    ADDRESS
+broken-no-class   <none>   localhost
+
+$ curl -o /dev/null -w '%{http_code}' http://localhost:8088/noclass
+503
+```
+
+**Root cause**: `CLASS` is `<none>`. No controller claimed this Ingress, so the rule was never
+turned into nginx configuration. The object exists and looks fine, and nothing is routing it.
+
+The confusing part is that `ADDRESS` still shows `localhost`, which makes it look connected.
+
+**Fix**: add `ingressClassName: nginx`.
+
+## Fault B: pointing at a Service that does not exist
+
+```yaml
+            backend:
+              service:
+                name: service-that-does-not-exist
+```
+
+**Symptom**: the same 503.
+
+**Investigation** is where they separate:
+
+```text
+$ kubectl describe ingress broken-wrong-svc
+  /wrongsvc   service-that-does-not-exist:80 (<error: services "service-that-does-not-exist" not found>)
+```
+
+`kubectl describe ingress` names the exact problem, where `kubectl get` showed nothing wrong.
+
+**Root cause**: the backend Service does not exist, so the controller has nothing to forward
+to.
+
+**Fix**: point it at a Service that exists, or create it.
+
+## Telling 503s apart
+
+Both faults gave a 503, so the status code alone is not enough.
+
+| Check | Fault A | Fault B |
+|---|---|---|
+| `kubectl get ingress`, CLASS column | `<none>` | `nginx` |
+| `kubectl describe ingress` | Nothing unusual | Names the missing Service |
+| `kubectl get endpoints <backend>` | n/a | Service does not exist |
+
+The order I work in for a broken ingress:
+
+1. `kubectl get ingress` and check the **CLASS** column is not `<none>`
+2. `kubectl describe ingress <name>` and read the backend line for errors
+3. `kubectl get endpoints <backend-service>`, since empty endpoints means the Service selector
+   is wrong, which is [session 14](../kubernetes-troubleshooting) again
+4. `kubectl logs -n ingress-nginx deploy/ingress-nginx-controller` for what the proxy itself
+   saw
+5. Check the path and any rewrite annotation, which is what bit me in
+   [the final project](../final-devops-project) where `/taskboard` was passed through
+   unchanged and the app returned 404 for everything
+
+## A third one I hit for real
+
+While building the final project, Helm refused to install because two Ingress objects claimed
+the same host and path:
+
+```text
+Error: admission webhook "validate.nginx.ingress.kubernetes.io" denied the request:
+host "_" and path "/taskboard(/|$)(.*)" is already defined in ingress taskboard/taskboard
+```
+
+Worth noting because the admission webhook caught it **before** anything was created, rather
+than letting two ingresses silently fight over the same path.

@@ -1,0 +1,16 @@
+# Broken on purpose: no ingressClassName, so no controller claims it.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: broken-no-class
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /noclass
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
