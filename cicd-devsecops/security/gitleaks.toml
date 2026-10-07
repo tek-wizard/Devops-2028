@@ -1,0 +1,14 @@
+# Gitleaks configuration. Extends the default rules and ignores the known
+# placeholder value that lives in the Kubernetes manifest on purpose.
+title = "devops-2028 secret scanning"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known safe placeholders used for the homework"
+regexes = [
+  '''placeholder-not-a-real-key''',
+  '''demo-key-12345''',
+  '''devops123''',
+]

@@ -1,0 +1,157 @@
+name: DevSecOps Pipeline
+
+# Code -> Build -> Unit Test -> SAST -> SCA -> Secret Scan
+#      -> Docker Build -> Image Scan -> Security Gate -> Push -> Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cicd-devsecops/**'
+      - '.github/workflows/devsecops.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/devsecops-demo
+
+jobs:
+  # ---------- 1. Build and unit test ----------
+  build-and-test:
+    name: Build and unit test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        working-directory: cicd-devsecops/app
+        run: npm install
+      - name: Run unit tests
+        working-directory: cicd-devsecops/app
+        run: npm test
+
+  # ---------- 2. SAST, scanning my own source ----------
+  sast:
+    name: SAST (Semgrep)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Semgrep
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: p/javascript
+        continue-on-error: true
+
+  # ---------- 3. SCA, scanning my dependencies ----------
+  sca:
+    name: SCA (npm audit and Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        working-directory: cicd-devsecops/app
+        run: npm install
+      - name: npm audit
+        working-directory: cicd-devsecops/app
+        run: npm audit --audit-level=high
+      - name: Trivy dependency scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: cicd-devsecops
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+
+  # ---------- 4. Secret scanning ----------
+  secret-scan:
+    name: Secret scanning (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: cicd-devsecops/security/gitleaks.toml
+        continue-on-error: true
+
+  # ---------- 5. Image build, image scan, security gate, push ----------
+  image:
+    name: Image build, scan and push
+    runs-on: ubuntu-latest
+    # the security gate: none of these may have failed
+    needs: [build-and-test, sast, sca, secret-scan]
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lowercase the image name
+        run: echo "IMAGE_NAME_LC=$(echo '${{ env.IMAGE_NAME }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Build the image (not pushed yet, it has to be scanned first)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./cicd-devsecops
+          push: false
+          load: true
+          tags: devsecops-demo:scan
+
+      - name: Scan the image with Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: devsecops-demo:scan
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          format: table
+
+      # Only reached if every scan above passed. This is the security gate.
+      - name: Security gate passed
+        run: echo "All scans passed, the image is allowed to be published"
+
+      - name: Log in to the registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push the scanned image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./cicd-devsecops
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}:${{ github.sha }}
+
+  # ---------- 6. Kubernetes manifests ----------
+  deploy:
+    name: Validate the Kubernetes manifests
+    runs-on: ubuntu-latest
+    needs: image
+    if: github.event_name != 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the manifests are valid
+        run: |
+          kubectl apply --dry-run=client -f cicd-devsecops/kubernetes/ -o name
+      - name: Note about the cluster
+        run: |
+          echo "The manifests are valid."
+          echo "My cluster is a local kind cluster on my laptop, which a GitHub runner"
+          echo "cannot reach, so the actual deployment is done locally and the output"
+          echo "is in the README."

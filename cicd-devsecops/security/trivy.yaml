@@ -1,0 +1,13 @@
+# Trivy settings used by the pipeline.
+severity:
+  - HIGH
+  - CRITICAL
+
+vulnerability:
+  type:
+    - os
+    - library
+
+# The build fails on anything HIGH or CRITICAL that has a fix available.
+exit-code: 1
+ignore-unfixed: true
