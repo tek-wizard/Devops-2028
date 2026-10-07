@@ -36,9 +36,9 @@ network.
 A subnet is a slice of the VPC range, and each one lives in exactly one **availability zone**.
 That is the key point: subnets are how a design spreads across AZs for resilience.
 
-**Public subnet** — has a route to an internet gateway. For load balancers and bastion hosts.
+**Public subnet**: has a route to an internet gateway. For load balancers and bastion hosts.
 
-**Private subnet** — no direct route in from the internet. For application servers and
+**Private subnet**: no direct route in from the internet. For application servers and
 databases. This is where most things belong.
 
 A typical two-AZ layout:

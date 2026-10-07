@@ -5,11 +5,11 @@
 
 ## Homework tasks
 
-**Task 1: Terraform S3 demo** — build a Terraform project with `main.tf`, `variables.tf`,
+**Task 1: Terraform S3 demo**: build a Terraform project with `main.tf`, `variables.tf`,
 `outputs.tf`, `provider.tf` and `terraform.tfvars`, create an S3 bucket, and run the whole
 workflow: `init`, `fmt`, `validate`, `plan`, `apply`, `show`, `output`, `destroy`.
 
-**Task 2: AWS services research** — learn and document IAM, EC2, S3, VPC and DynamoDB/RDS,
+**Task 2: AWS services research**: learn and document IAM, EC2, S3, VPC and DynamoDB/RDS,
 with a separate README for each.
 
 ```

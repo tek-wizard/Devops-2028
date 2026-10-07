@@ -5,14 +5,14 @@
 
 ## Homework tasks
 
-**Task 1** — hands-on practice with the Helm commands: `create`, `install`, `list`, `status`,
+**Task 1**: hands-on practice with the Helm commands: `create`, `install`, `list`, `status`,
 `get`, `upgrade`, `history`, `rollback`, `uninstall`, `repo`, `search`. For each one: run it,
 understand it, capture the output, document it.
 
-**Task 2** — a complete rollback workflow: install, upgrade, verify, upgrade again, verify,
+**Task 2**: a complete rollback workflow: install, upgrade, verify, upgrade again, verify,
 rollback, verify.
 
-**Task 3** — mini project.
+**Task 3**: mini project.
 
 The chart I made is in [notes-chart](notes-chart).
 
@@ -25,9 +25,9 @@ packages all of that into a **chart**, with the values that change pulled out in
 
 Three words that matter:
 
-- **Chart** — the package of templates
-- **Release** — one installation of a chart into a cluster, with a name
-- **Values** — the settings that fill in the templates
+- **Chart**: the package of templates
+- **Release**: one installation of a chart into a cluster, with a name
+- **Values**: the settings that fill in the templates
 
 The same chart can be installed many times with different values, which is how one chart
 serves dev, staging and production.

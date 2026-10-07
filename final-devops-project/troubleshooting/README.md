@@ -30,7 +30,7 @@ it is the interesting one.
 
 ## Fault 1: ImagePullBackOff
 
-**Identify** — status is `ImagePullBackOff`.
+**Identify**: status is `ImagePullBackOff`.
 
 **Investigate**
 
@@ -43,7 +43,7 @@ $ kubectl describe pod -n taskboard-broken -l app=tb-fault1
   Warning  Failed  28s (x2 over 56s)  kubelet  Error: ImagePullBackOff
 ```
 
-**Root cause** — the deployment asks for tag `9.9-does-not-exist`. The real tag is `1.0`.
+**Root cause**: the deployment asks for tag `9.9-does-not-exist`. The real tag is `1.0`.
 
 Worth noting the wording: *"repository does not exist or may require authorization"*. Because
 `taskboard` is a local image not on Docker Hub, the registry answers with an auth error rather
@@ -66,7 +66,7 @@ tb-fault1-6cf6cbc9dc-vf6wt     Running    restarts=0
 
 ## Fault 2: CreateContainerConfigError
 
-**Identify** — status is `CreateContainerConfigError`. The image pulled fine; the container
+**Identify**: status is `CreateContainerConfigError`. The image pulled fine; the container
 could not be built from the spec.
 
 **Investigate**
@@ -79,7 +79,7 @@ $ kubectl get configmap tb-config-broken -n taskboard-broken -o jsonpath='{.data
 {"APP_NAME":"Taskboard"}
 ```
 
-**Root cause** — the Deployment reads `DATA_DIR` from the ConfigMap with a `configMapKeyRef`,
+**Root cause**: the Deployment reads `DATA_DIR` from the ConfigMap with a `configMapKeyRef`,
 and the ConfigMap only has `APP_NAME`.
 
 `kubectl logs` is useless here, because the container never started and there are no logs. This
@@ -106,7 +106,7 @@ tb-fault2-64598c8695-52zjv     Running    restarts=0
 
 ## Fault 3: the one that hides
 
-**Identify** — this is the dangerous one. The Pod says:
+**Identify**: this is the dangerous one. The Pod says:
 
 ```text
 tb-fault3-6946ddb687-dpgrv     Running
@@ -133,7 +133,7 @@ $ kubectl get endpoints tb-fault3 -n taskboard-broken
 The endpoint list is **not empty**, so the selector matches the Pod. But the port is **8080**,
 and the app listens on 3000.
 
-**Root cause** — `targetPort: 8080` in the Service, container port 3000. The Service finds the
+**Root cause**: `targetPort: 8080` in the Service, container port 3000. The Service finds the
 Pod correctly and then forwards to a port nothing is listening on.
 
 This is the distinction from session 14 that is worth keeping:
@@ -164,7 +164,7 @@ No Pod restart was needed. The Pod was never the problem.
 
 ## Fault 4: Pending
 
-**Identify** — status `Pending`, and with `-o wide` there is no IP and no node, so it was never
+**Identify**: status `Pending`, and with `-o wide` there is no IP and no node, so it was never
 scheduled.
 
 **Investigate**
@@ -176,7 +176,7 @@ $ kubectl describe pod -n taskboard-broken -l app=tb-fault4
            preemption: 0/2 nodes are available: 2 Preemption is not helpful for scheduling.
 ```
 
-**Root cause** — it requests 200Gi of memory and 40 CPUs. The message breaks the two nodes
+**Root cause**: it requests 200Gi of memory and 40 CPUs. The message breaks the two nodes
 down: the worker fails on resources, and the control plane is excluded by its taint.
 
 **Fix**
@@ -207,11 +207,11 @@ $ kubectl get pods -n taskboard-broken
 
 ## The method
 
-1. `kubectl get pods -o wide` — what is broken, and did it get a node at all
-2. `kubectl describe pod` — read the Events at the bottom
-3. `kubectl logs` — only if the container actually started
-4. `kubectl get endpoints` — for anything that is Running but unreachable
-5. `kubectl exec` from a test Pod — check from where the app really sits
+1. `kubectl get pods -o wide`: what is broken, and did it get a node at all
+2. `kubectl describe pod`: read the Events at the bottom
+3. `kubectl logs`: only if the container actually started
+4. `kubectl get endpoints`: for anything that is Running but unreachable
+5. `kubectl exec` from a test Pod: check from where the app really sits
 
 ## What this challenge taught me
 

@@ -5,15 +5,15 @@
 
 ## Homework tasks
 
-**Task 1** — hands-on practice with the troubleshooting commands: `kubectl get`, `describe`,
+**Task 1**: hands-on practice with the troubleshooting commands: `kubectl get`, `describe`,
 `logs`, `exec`, `events`, `explain`, `top`, and `get -o wide`.
 
-**Task 2** — break things on purpose and troubleshoot them: CrashLoopBackOff,
+**Task 2**: break things on purpose and troubleshoot them: CrashLoopBackOff,
 ImagePullBackOff, ErrImagePull, Pending, ContainerCreating, Service connectivity, DNS, Pod
 networking and configuration issues. For each one: identify, investigate, find the root
 cause, fix, verify, document.
 
-**Task 3** — mini project.
+**Task 3**: mini project.
 
 Broken manifests are in [manifests](manifests) and the corrected ones are in
 [fixed](fixed).
@@ -184,7 +184,7 @@ Events:
   Warning  Failed   16s (x2 over 43s)  kubelet  Error: ImagePullBackOff
 ```
 
-**Root cause** — the tag `does-not-exist-123` is not on Docker Hub.
+**Root cause**: the tag `does-not-exist-123` is not on Docker Hub.
 
 Both statuses show up here and they are the same problem at different stages.
 **`ErrImagePull`** is the first failure. **`ImagePullBackOff`** is what it becomes once
@@ -193,7 +193,7 @@ Kubernetes starts waiting longer between retries instead of hammering the regist
 Other things that cause this: a typo in the image name, a private registry with no
 `imagePullSecret`, or the wrong architecture.
 
-**Fix** — [fixed/fix-01-image.yaml](fixed/fix-01-image.yaml) uses `nginx:alpine`.
+**Fix**: [fixed/fix-01-image.yaml](fixed/fix-01-image.yaml) uses `nginx:alpine`.
 
 **Verify**
 
@@ -217,7 +217,7 @@ broken-crash   0/1     Error    3 (33s ago)   46s
 The restart count going up is the giveaway. The status alternates between `Error` and
 `CrashLoopBackOff` as Kubernetes keeps retrying with longer gaps.
 
-**Investigate** — here the container *did* start, so `logs` is the right tool:
+**Investigate**: here the container *did* start, so `logs` is the right tool:
 
 ```text
 $ kubectl logs broken-crash
@@ -225,13 +225,13 @@ starting up
 config file missing, exiting
 ```
 
-**Root cause** — the container runs a command that exits immediately. Kubernetes expects the
+**Root cause**: the container runs a command that exits immediately. Kubernetes expects the
 main process to keep running, so when it exits it restarts it, and the cycle repeats.
 
 In real apps this is usually a missing config file, a failed database connection on startup,
 or a wrong command in the manifest.
 
-**Fix** — [fixed/fix-02-crash.yaml](fixed/fix-02-crash.yaml) keeps the process alive.
+**Fix**: [fixed/fix-02-crash.yaml](fixed/fix-02-crash.yaml) keeps the process alive.
 
 **Verify**
 
@@ -264,11 +264,11 @@ Events:
   Warning  FailedScheduling  43s (x2 over 46s)  default-scheduler  0/2 nodes are available: 1 Insufficient cpu, 1 Insufficient memory, 1 node(s) had untolerated taint(s).
 ```
 
-**Root cause** — the Pod asks for 50 CPUs and 100Gi of memory. No node has that. The message
+**Root cause**: the Pod asks for 50 CPUs and 100Gi of memory. No node has that. The message
 even breaks it down: one node fails on resources and the other is the control plane, which
 has a taint keeping normal Pods off it.
 
-**Fix** — [fixed/fix-03-pending.yaml](fixed/fix-03-pending.yaml) asks for `100m` CPU and
+**Fix**: [fixed/fix-03-pending.yaml](fixed/fix-03-pending.yaml) asks for `100m` CPU and
 `64Mi` memory.
 
 **Verify**
@@ -307,11 +307,11 @@ $ kubectl get configmap app-settings -o jsonpath='{.data}'
 {"LOG_LEVEL":"debug"}
 ```
 
-**Root cause** — the Pod asks for the key `API_KEY`, and the ConfigMap only has `LOG_LEVEL`.
+**Root cause**: the Pod asks for the key `API_KEY`, and the ConfigMap only has `LOG_LEVEL`.
 The error message names the exact key and the exact ConfigMap, which made this the fastest
 one to find.
 
-**Fix** — [fixed/fix-04-config.yaml](fixed/fix-04-config.yaml) adds the key.
+**Fix**: [fixed/fix-04-config.yaml](fixed/fix-04-config.yaml) adds the key.
 
 **Verify**
 
@@ -326,7 +326,7 @@ API_KEY is demo-key-12345
 
 ## Issue 5: Service connectivity, selector does not match
 
-**Identify** — the Service looks completely healthy:
+**Identify**: the Service looks completely healthy:
 
 ```text
 $ kubectl get svc shop-svc
@@ -354,10 +354,10 @@ $ kubectl get pods -l app=shop -o jsonpath='{.items[0].metadata.labels}'
 {"app":"shop","pod-template-hash":"64cdd87db6"}
 ```
 
-**Root cause** — the Service selects `app=shop-frontend` and the Pods are labelled
+**Root cause**: the Service selects `app=shop-frontend` and the Pods are labelled
 `app=shop`. They never match, so the Service has nothing to send traffic to.
 
-**Fix** — [fixed/fix-05-06-service.yaml](fixed/fix-05-06-service.yaml) selects `app=shop`.
+**Fix**: [fixed/fix-05-06-service.yaml](fixed/fix-05-06-service.yaml) selects `app=shop`.
 
 **Verify**
 
@@ -401,7 +401,7 @@ Name:	shop-wrongport.default.svc.cluster.local
 Address: 10.96.106.67
 ```
 
-**Root cause** — `targetPort: 8080` but the container listens on 80. The selector is fine, so
+**Root cause**: `targetPort: 8080` but the container listens on 80. The selector is fine, so
 the Service finds the Pods and then forwards to a port nothing is listening on.
 
 This is also how I tell the three failure types apart:
@@ -412,7 +412,7 @@ This is also how I tell the three failure types apart:
 | Resolves, endpoints empty | Selector does not match the Pod labels |
 | Resolves, endpoints present, connection refused | Wrong `targetPort`, or the app is not listening |
 
-**Fix and verify** — same file as issue 5, with `targetPort: 80`, verified above.
+**Fix and verify**: same file as issue 5, with `targetPort: 80`, verified above.
 
 ---
 
@@ -474,12 +474,12 @@ kubectl get endpoints shop-fixed
 
 ## The order I work in now
 
-1. `kubectl get pods -o wide` — what is broken, and did it even get a node
-2. `kubectl describe pod <name>` — read the Events at the bottom
-3. `kubectl logs <name>` — only if the container actually started
-4. `kubectl logs <name> --previous` — for a crash loop
-5. `kubectl get endpoints <svc>` — for anything Service related
-6. `kubectl exec` into a test Pod — to check from where the app really sits
+1. `kubectl get pods -o wide`: what is broken, and did it even get a node
+2. `kubectl describe pod <name>`: read the Events at the bottom
+3. `kubectl logs <name>`: only if the container actually started
+4. `kubectl logs <name> --previous`: for a crash loop
+5. `kubectl get endpoints <svc>`: for anything Service related
+6. `kubectl exec` into a test Pod: to check from where the app really sits
 
 ## Status cheat sheet
 

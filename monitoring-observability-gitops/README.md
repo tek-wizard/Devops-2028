@@ -5,13 +5,13 @@
 
 ## Homework tasks
 
-**Task 1: Monitoring** — metrics, logs, alerts, CPU utilisation, memory utilisation,
+**Task 1: Monitoring**: metrics, logs, alerts, CPU utilisation, memory utilisation,
 application health.
 
-**Task 2: Observability** — the three pillars, what each means, why observability is needed,
+**Task 2: Observability**: the three pillars, what each means, why observability is needed,
 common tools, Kubernetes observability.
 
-**Task 3: GitOps** — what GitOps is, git as the source of truth, declarative configuration,
+**Task 3: GitOps**: what GitOps is, git as the source of truth, declarative configuration,
 continuous reconciliation, the workflow, Kubernetes and GitOps.
 
 Everything runs on the same kind cluster from
@@ -448,10 +448,10 @@ apply git's version
 
 Two settings control what it does about differences:
 
-- **`selfHeal: true`** — if something is changed in the cluster by hand, Argo CD puts it back.
+- **`selfHeal: true`**: if something is changed in the cluster by hand, Argo CD puts it back.
   Scaling the Deployment with `kubectl scale` would be reverted to the 2 replicas git says,
   because git is the source of truth and a manual change is drift.
-- **`prune: true`** — if a resource is deleted from git, Argo CD deletes it from the cluster.
+- **`prune: true`**: if a resource is deleted from git, Argo CD deletes it from the cluster.
   Without this, removing a file leaves the object running forever.
 
 Both are visible in the live object:

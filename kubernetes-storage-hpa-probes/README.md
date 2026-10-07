@@ -5,13 +5,13 @@
 
 ## Homework tasks
 
-**Task 1: Kubernetes Volumes** — document emptyDir, hostPath, PersistentVolume,
+**Task 1: Kubernetes Volumes**: document emptyDir, hostPath, PersistentVolume,
 PersistentVolumeClaim, StorageClass and dynamic provisioning, with practical examples.
 
-**Task 2: HPA hands-on** — deploy the app, configure HPA, verify it, deploy a load
+**Task 2: HPA hands-on**: deploy the app, configure HPA, verify it, deploy a load
 generator, increase the load, watch CPU and Pod scaling, and capture the output.
 
-**Task 3: Mini project** — put storage, probes and HPA together in one app.
+**Task 3: Mini project**: put storage, probes and HPA together in one app.
 
 Cluster is the same kind cluster from [kubernetes-fundamentals](../kubernetes-fundamentals).
 All YAML is in [manifests](manifests).
