@@ -273,6 +273,8 @@ resource "aws_s3_bucket" "demo" {
 
 Shows the full state, including every attribute AWS filled in that I never wrote.
 
+![terraform apply and outputs](screenshots/terraform-apply.png)
+
 ## Checking it from outside Terraform
 
 Terraform saying it worked is one thing, so I checked with the AWS CLI as well:
@@ -295,6 +297,8 @@ aws_s3_bucket.demo
 aws_s3_bucket_public_access_block.demo
 aws_s3_bucket_versioning.demo
 ```
+
+![the bucket checked with the AWS CLI, and the state](screenshots/verified-and-state.png)
 
 ## terraform destroy
 

@@ -232,6 +232,8 @@ JOBS
 ✓ Validate the Kubernetes manifests in 8s
 ```
 
+![the full DevSecOps pipeline green](screenshots/devsecops-pipeline-green.png)
+
 **The lesson:** the fix was not to lower the severity threshold or add an ignore rule, which
 is the tempting shortcut. It was to take the vulnerable software out of the image, which made
 the image smaller as well as safer.
@@ -398,6 +400,8 @@ $ kubectl exec dsctest -- wget -qO- 'http://devsecops-demo/?name=<script>bad</sc
 
 The last one is the XSS attempt being neutralised by the running application. The angle
 brackets are gone, so the browser sees text instead of a script tag.
+
+![deployed with a hardened security context](screenshots/deployed-hardened.png)
 
 ### Validation in the pipeline
 

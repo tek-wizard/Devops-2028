@@ -393,6 +393,8 @@ controller specific. That is why
 I broke it two ways. Both return the same 503, with completely different causes. Manifests in
 [manifests/broken](manifests/broken).
 
+![the IngressClass and the ingress objects](screenshots/ingress-and-class.png)
+
 ## Fault A: no ingressClassName
 
 ```yaml
@@ -445,6 +447,8 @@ $ kubectl describe ingress broken-wrong-svc
 to.
 
 **Fix**: point it at a Service that exists, or create it.
+
+![both faults returning 503](screenshots/ingress-faults.png)
 
 ## Telling 503s apart
 

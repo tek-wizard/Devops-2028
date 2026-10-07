@@ -448,6 +448,8 @@ Address: 10.96.61.126
 
 That Service is in the `dns-demo` namespace and I queried from a pod in `default`.
 
+![looking up a Service in another namespace](screenshots/fqdn.png)
+
 ## Namespace based DNS
 
 The short name does **not** work across namespaces:
@@ -516,6 +518,8 @@ $ kubectl get svc -n kube-system kube-dns
 That is the whole link: the kubelet writes that address into every pod it starts.
 
 Two replicas because DNS failing takes the whole cluster down with it.
+
+![the CoreDNS pods and Service](screenshots/coredns.png)
 
 ## Why Kubernetes uses it
 

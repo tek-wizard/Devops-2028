@@ -213,6 +213,8 @@ The order is the dependency graph playing out:
 - The subnet, internet gateway and security group all waited for the VPC, then ran together.
 - The EC2 instance was last, because it needed both the subnet and the security group.
 
+![terraform apply creating 9 resources](screenshots/terraform-apply.png)
+
 ## terraform output
 
 ```text
@@ -248,6 +250,8 @@ $ aws ec2 describe-instances --filters Name=tag:Name,Values=devops-2028-web
 $ aws s3 ls
 2026-10-07 00:48:59 devops-2028-assets-prateek
 ```
+
+![the EC2 instance checked with the AWS CLI](screenshots/ec2-verified.png)
 
 ## Terraform state
 

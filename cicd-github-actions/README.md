@@ -238,6 +238,8 @@ JOBS
 
 Both jobs green. The CD job started only after CI finished, because of `needs`.
 
+![both pipeline jobs green](screenshots/pipeline-green.png)
+
 ### The test step on the runner
 
 ```text
@@ -246,6 +248,8 @@ Both jobs green. The CD job started only after CI finished, because of `needs`.
 # fail 0
 # duration_ms 73.636109
 ```
+
+![the workflow runs](screenshots/workflow-runs.png)
 
 ### The image that was published
 

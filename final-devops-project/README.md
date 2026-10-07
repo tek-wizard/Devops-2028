@@ -214,6 +214,8 @@ persistentvolumeclaim/taskboard-data   Bound   pvc-384ff07b...   100Mi   RWO   s
 ingress.networking.k8s.io/taskboard    nginx   *   localhost   80
 ```
 
+![the whole stack deployed](screenshots/deployed-stack.png)
+
 ## Config and secrets reaching the container
 
 ```text
@@ -259,6 +261,8 @@ spec:
 ```
 
 Everything after the prefix lands in `$2`, and that is what reaches the app.
+
+![the app, its config and its metrics](screenshots/app-and-metrics.png)
 
 ## Storage really persists
 
@@ -554,6 +558,8 @@ From here, deploying a change means merging a pull request. Nobody runs `kubectl
 against the namespace, and a rollback is `git revert`.
 
 ---
+
+![all four faults fixed](screenshots/troubleshooting-fixed.png)
 
 # Final troubleshooting challenge
 

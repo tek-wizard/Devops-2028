@@ -66,6 +66,8 @@ What each piece does:
 There are two node-exporter Pods because it is a DaemonSet, which is the pattern from
 [session 10](../kubernetes-pods-replicasets-deployments).
 
+![the Prometheus stack installed with Helm](screenshots/monitoring-stack.png)
+
 ## Metrics
 
 Prometheus **pulls**. It asks each target for its metrics on an interval, rather than
@@ -427,6 +429,8 @@ its image is broken, which is exactly the `ImagePullBackOff` case from session 1
 
 The `revision` field is the **git commit SHA**. So the cluster state is traceable to an exact
 commit, the same traceability idea as tagging images with the SHA in session 16.
+
+![Argo CD synced from git](screenshots/argocd-synced.png)
 
 ## Continuous reconciliation
 

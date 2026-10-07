@@ -128,6 +128,8 @@ pod/notes-notes-chart-5d896b89d-dph76   0/1     ContainerCreating   0          0
 pod/notes-notes-chart-5d896b89d-h5nn8   0/1     ContainerCreating   0          0s
 ```
 
+![helm install and helm list](screenshots/helm-install.png)
+
 ## helm list
 
 ```text
@@ -242,6 +244,8 @@ a chart fix bumps the chart version while the app stays the same.
 
 Install, upgrade, verify, upgrade again, verify, rollback, verify.
 
+![the revision history](screenshots/helm-history.png)
+
 ## Install (revision 1)
 
 ```text
@@ -345,6 +349,8 @@ new **revision 4** described as "Rollback to 1". So history only ever moves forw
 the state goes backwards. That means I could roll forward again to revision 3 if I wanted.
 
 `helm rollback notes` with no number goes back one revision.
+
+![rolling back to revision 1](screenshots/helm-rollback.png)
 
 ## helm uninstall
 

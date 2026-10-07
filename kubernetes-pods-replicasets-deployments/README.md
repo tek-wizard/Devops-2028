@@ -481,6 +481,8 @@ That is the real benefit. A rollback is a label change, not a redeploy, so it ta
 instead of minutes. The cost is running two full copies, so double the resources during a
 release.
 
+![both versions running and the Service switching between them](screenshots/blue-green.png)
+
 ## 4. Canary
 
 Send a small share of traffic to the new version first.
@@ -516,6 +518,8 @@ canary means scaling the canary deployment up and the stable one down.
 The limitation is that the split is coarse. 1 pod in 5 is 20%, and getting 1% means 99 stable
 pods. Real canary setups use a service mesh or an ingress controller that can split by
 percentage directly, and route on headers so a specific group of users gets the new version.
+
+![the canary traffic split](screenshots/canary-split.png)
 
 ## Comparing them
 
@@ -569,6 +573,8 @@ life-hooks       Running     <none>      <none>
 The exit code is the detail that matters. `0` becomes `Succeeded` with reason `Completed`, and
 `3` becomes `Failed` with reason `Error`. That is the whole rule: Kubernetes decides success
 purely from the exit code.
+
+![the final pod phases](screenshots/pod-lifecycle.png)
 
 ## restartPolicy changes the outcome
 
