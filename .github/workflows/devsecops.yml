@@ -146,9 +146,15 @@ jobs:
     if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v4
-      - name: Check the manifests are valid
+      # kubectl apply --dry-run=client still needs to reach a cluster for API
+      # discovery, which a runner has no access to, so this uses kubeconform,
+      # which validates manifests against the schemas offline.
+      - name: Validate the manifests with kubeconform
         run: |
-          kubectl apply --dry-run=client -f cicd-devsecops/kubernetes/ -o name
+          curl -sSL -o kubeconform.tar.gz \
+            https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar xzf kubeconform.tar.gz kubeconform
+          ./kubeconform -strict -summary cicd-devsecops/kubernetes/
       - name: Note about the cluster
         run: |
           echo "The manifests are valid."
